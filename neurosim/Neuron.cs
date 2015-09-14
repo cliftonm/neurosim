@@ -91,7 +91,7 @@ namespace neurosim
 
 		public void TestPattern()
 		{
-			CurrentMembranePotential += testPatternDir;
+			CurrentMembranePotential += testPatternDir << 8;
 
 			if (CurrentMembranePotential > (65 << 8))
 			{

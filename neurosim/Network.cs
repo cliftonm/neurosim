@@ -10,10 +10,20 @@ namespace neurosim
 {
 	public class Network : GraphicsPanel, ITimeComponent
 	{
-		public List<NeuronPlot> Plots { get; set; }
+		protected List<NeuronPlot> plots;
 
 		protected Bitmap bitmap;
 		protected FastPixel fp;
+
+		public Network()
+		{
+			plots = new List<NeuronPlot>();
+		}
+
+		public void SetPlots(List<NeuronPlot> plots)
+		{
+			this.plots = plots;
+		}
 
 		public void Tick()
 		{
@@ -32,7 +42,7 @@ namespace neurosim
 			fp.Lock();
 			fp.Clear(Color.Black);
 
-			foreach (NeuronPlot np in Plots)
+			foreach (NeuronPlot np in plots)
 			{
 				fp.SetPixel(np.Location, Color.FromArgb(0, (np.Neuron.CurrentMembranePotential >> 8) + 100, 0));
 			}
