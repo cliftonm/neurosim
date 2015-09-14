@@ -10,37 +10,33 @@ namespace neurosim
 {
 	public class Scope : GraphicsPanel, ITimeComponent
 	{
-		protected Pen axisPen { get; set; }
-		protected Font vFont { get; set; }
-		protected Brush vBrush { get; set; }
-		protected Pen dataPen { get; set; }
-		protected List<int> buffer { get; set; }
-		protected int head;
+		protected Pen axisPen;
+		protected Font vFont;
+		protected Brush vBrush;
+		protected int vOffset;
+		protected List<Probe> probes;
 
 		public Scope()
 		{
 			axisPen = new Pen(Color.Green);
 			vFont = new Font("Consolas", 8);
 			vBrush = new SolidBrush(Color.Green);
-			dataPen = new Pen(Color.White);
-			buffer = new List<int>();
+			probes = new List<Probe>();
 		}
 
-		public void NewValue(int val)
+		public void Initialized()
 		{
-			if (buffer.Count < Width)
-			{
-				buffer.Add(val);
-			}
-			else
-			{
-				buffer[head] = val;
-				Inc(ref head);
-			}
+			vOffset = (Height - 200) / 2;
+		}
+
+		public void AddProbe(Neuron n, Color color)
+		{
+			probes.Add(new Probe(n, Width, color, vOffset));
 		}
 
 		public void Tick()
 		{
+			probes.ForEach(p => p.Tick());
 			Refresh();
 		}
 
@@ -49,7 +45,8 @@ namespace neurosim
 			base.OnPaint(e);
 			DrawHorizontalAxis(e.Graphics);
 			DrawVerticalAxis(e.Graphics);
-			DrawBuffer(e.Graphics);
+
+			probes.ForEach(p => p.DrawBuffer(e.Graphics));
 		}
 
 		protected void DrawHorizontalAxis(Graphics gr)
@@ -68,38 +65,14 @@ namespace neurosim
 
 			for (int n = -100; n <= 100; n += 20)
 			{
+				int heightLine = 100 - n + vOffset;
+				int heightText = 100 - n + vOffset - 6;
+
 				if (n != 0)
 				{
-					gr.DrawLine(axisPen, Width / 2 - 5, 100 - n + 20, Width / 2 + 5, 100 - n + 20);
-					gr.DrawString(n.ToString(), vFont, vBrush, new PointF(Width / 2 + 7, 100 - n + 14));
+					gr.DrawLine(axisPen, Width / 2 - 5, heightLine, Width / 2 + 5, heightLine);
+					gr.DrawString(n.ToString(), vFont, vBrush, new Point(Width / 2 + 7, heightText));
 				}
-			}
-		}
-
-		protected void DrawBuffer(Graphics gr)
-		{
-			if (buffer.Count > 0)
-			{
-				int n = head;
-				int v = 100 - buffer[n] + 20;
-				Inc(ref n);
-
-				for (int i = 1; i < buffer.Count; i++)
-				{
-					// gr.DrawRectangle(dataPen, Width - buffer.Count + i, 100 - buffer[n] + 20, 1, 1);
-					int v2 = 100 - buffer[n] + 20;
-					gr.DrawLine(dataPen, Width - buffer.Count + (i - 1), v, Width - buffer.Count + i, v2);
-					v = v2;
-					Inc(ref n);
-				}
-			}
-		}
-
-		protected void Inc(ref int n)
-		{
-			if (++n == Width)
-			{
-				n = 0;
 			}
 		}
 	}

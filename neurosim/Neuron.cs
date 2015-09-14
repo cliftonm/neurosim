@@ -8,6 +8,15 @@ namespace neurosim
 {
 	public class Neuron : ITimeComponent
 	{
+		public enum State
+		{
+			Integrating,
+			Firing,
+			RefractoryStart,
+			AbsoluteRefractory,
+			RelativeRefractory,
+		}
+
 		/// <summary>
 		/// The quiescent resting potential state of the neuron.
 		/// </summary>
@@ -39,52 +48,67 @@ namespace neurosim
 		/// </summary>
 		public int Integration { get; set; }
 
+		public State ActionState { get { return actionState; } }
+
 		protected int testPatternDir = 1;
-		protected int actionState;
+		protected State actionState;
+		protected List<Connection> connections;
+		protected List<int> inputs;
 
 		public Neuron()
 		{
-			actionState = -1;
+			connections = new List<Connection>();
+			inputs = new List<int>();
+			actionState = State.Integrating;
 			RestingPotential = -65 << 8;
 			CurrentMembranePotential = -65 << 8;
 			ActionPotentialThreshold = -35 << 8;
 			ActionPotentialValue = 40 << 8;
 		}
 
+		public void AddConnection(Connection c)
+		{
+			connections.Add(c);
+		}
+
+		public void AddInput(int val)
+		{
+			inputs.Add(val);
+		}
+
 		public void Tick()
 		{
 			switch (actionState)
 			{
-				case -1:		// not in action potential
-					CurrentMembranePotential += Leakage;
-
-					if (CurrentMembranePotential >= ActionPotentialThreshold)
-					{
-						ActionPotential();
-					}
-
+				case State.Integrating:
+					Integrate();
+					FireOnActionPotential();
 					break;
 
-				case 0:
+				case State.Firing:
 					++actionState;		// hold for one 1 tick
 					break;
 
-				case 1:
+				case State.RefractoryStart:
 					// refactory period start
 					CurrentMembranePotential = RestingPotential - (20 << 8) + Integration;
 					++actionState;
 					break;
 
-				case 2:
+				case State.AbsoluteRefractory:
 					// refactory period, linear ramp back to the resting potential.
 					CurrentMembranePotential += (1 << 8);
 
 					if (CurrentMembranePotential >= RestingPotential)
 					{
 						// Done with refactory period.
-						actionState = -1;
+						actionState = State.Integrating;
 					}
 
+					break;
+
+				case State.RelativeRefractory:
+					// Not implemented.
 					break;
 			}
 		}
@@ -107,7 +131,31 @@ namespace neurosim
 		protected void ActionPotential()
 		{
 			CurrentMembranePotential = ActionPotentialValue;
-			actionState = 0;
+			actionState = State.Firing;
+		}
+
+		protected void TriggerConnections()
+		{
+			foreach (Connection c in connections)
+			{
+				c.Fire();
+			}
+		}
+
+		protected void Integrate()
+		{
+			CurrentMembranePotential += Leakage;
+			inputs.ForEach(v => CurrentMembranePotential += v);
+			inputs.Clear();
+		}
+
+		protected void FireOnActionPotential()
+		{
+			if (CurrentMembranePotential >= ActionPotentialThreshold)
+			{
+				ActionPotential();
+				TriggerConnections();
+			}
 		}
 	}
 }

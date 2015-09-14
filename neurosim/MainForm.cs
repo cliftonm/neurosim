@@ -15,9 +15,11 @@ namespace neurosim
 	public partial class MainForm : Form
 	{
 		protected List<NeuronPlot> neuronPlots;
-		protected Neuron scopedNeuron;
+		protected Neuron pacemakerNeuron;
+		protected Neuron receiverNeuron;
 		protected Timer timer;
 		protected String filename;
+		protected bool paused;
 
 		public MainForm()
 		{
@@ -33,14 +35,22 @@ namespace neurosim
 		protected void Initialize()
 		{
 			neuronPlots = new List<NeuronPlot>();
+			pnlScope.Initialized();
 
-			scopedNeuron = new Neuron();
-			scopedNeuron.Leakage = 2 << 8;
-			scopedNeuron.Integration = 0;
+			pacemakerNeuron = new Neuron();
+			pacemakerNeuron.Leakage = 2 << 8;
+			pacemakerNeuron.Integration = 0;
 
-			neuronPlots.Add(new NeuronPlot() { Neuron = scopedNeuron, Location = new Point(pnlNetwork.Width / 2, pnlNetwork.Height / 2) });
+			receiverNeuron = new Neuron();
+
+			pacemakerNeuron.AddConnection(new Connection(receiverNeuron));
+
+			neuronPlots.Add(new NeuronPlot() { Neuron = pacemakerNeuron, Location = new Point(pnlNetwork.Width / 2, pnlNetwork.Height / 2) });
+			neuronPlots.Add(new NeuronPlot() { Neuron = receiverNeuron, Location = new Point(pnlNetwork.Width / 2 + 20, pnlNetwork.Height / 2) });
 
 			pnlNetwork.SetPlots(neuronPlots);
+			pnlScope.AddProbe(pacemakerNeuron, Color.LightBlue);
+			pnlScope.AddProbe(receiverNeuron, Color.Red);
 
 			timer = new Timer();
 			timer.Interval = 10;
@@ -51,13 +61,11 @@ namespace neurosim
 		protected void OnTick(object sender, EventArgs e)
 		{
 			// scopedNeuron.TestPattern();
-
 			foreach (NeuronPlot np in neuronPlots)
 			{
 				np.Neuron.Tick();
 			}
 
-			pnlScope.NewValue(scopedNeuron.CurrentMembranePotential >> 8);
 			pnlScope.Tick();
 			pnlNetwork.Tick();
 		}
@@ -118,7 +126,7 @@ namespace neurosim
 			fs.Close();
 
 			// TODO: Save scoped neuron indices.
-			scopedNeuron = neuronPlots[0].Neuron;
+			pacemakerNeuron = neuronPlots[0].Neuron;
 		}
 
 		protected void SaveNetwork(string filename)
@@ -128,6 +136,32 @@ namespace neurosim
 	        FileStream fs = File.Create(filename);
 			xs.Serialize(fs, neuronPlots);
 			fs.Close();
+		}
+
+		private void btnPauseGo_Click(object sender, EventArgs e)
+		{
+			paused ^= true;
+
+			if (paused)
+			{
+				btnPauseGo.Text = "Resume";
+				Pause();
+			}
+			else
+			{
+				btnPauseGo.Text = "Pause";
+				Resume();
+			}
+		}
+
+		protected void Pause()
+		{
+			timer.Stop();
+		}
+
+		protected void Resume()
+		{
+			timer.Start();
 		}
 	}
 }

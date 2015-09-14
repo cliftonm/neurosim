@@ -44,7 +44,34 @@ namespace neurosim
 
 			foreach (NeuronPlot np in plots)
 			{
-				fp.SetPixel(np.Location, Color.FromArgb(0, (np.Neuron.CurrentMembranePotential >> 8) + 100, 0));
+				Color color = Color.Black;
+
+				switch (np.Neuron.ActionState)
+				{
+					case Neuron.State.Integrating:
+						int offset = np.Neuron.ActionPotentialValue - np.Neuron.CurrentMembranePotential;
+						int cval = (255 - (offset >> 8)).Min(0);
+						color = Color.FromArgb(0, cval, 0);
+						break;
+
+					case Neuron.State.Firing:
+						color = Color.White;
+						break;
+
+					case Neuron.State.RefractoryStart:
+					case Neuron.State.AbsoluteRefractory:
+						color = Color.FromArgb(255, 64, 64);
+						break;
+
+					case Neuron.State.RelativeRefractory:
+						color = Color.Yellow;
+						break;
+				}
+
+				fp.SetPixel(np.Location, color);
+				fp.SetPixel(np.Location + new Size(1, 0), color);
+				fp.SetPixel(np.Location + new Size(0, 1), color);
+				fp.SetPixel(np.Location + new Size(1, 1), color);
 			}
 
 			fp.Unlock(true);
