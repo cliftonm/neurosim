@@ -11,5 +11,6 @@ namespace neurosim
 	{
 		public Neuron Neuron { get; set; }
 		public Point Location { get; set; }
+		public int FiredCountDown { get; set; }
 	}
 }

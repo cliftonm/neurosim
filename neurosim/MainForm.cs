@@ -14,7 +14,7 @@ namespace neurosim
 {
 	public partial class MainForm : Form, ITimeComponent
 	{
-		public const int REFRESH_RATE = 10;
+		public const int REFRESH_RATE = 60;
 
 		protected List<NeuronPlot> neuronPlots;
 		protected Neuron pacemakerNeuron;
@@ -59,14 +59,21 @@ namespace neurosim
 		{
 			btnStep.Enabled = false;
 
-			rnd = new Random(1);						// always use the same seed so we can generate the same dataset.
+			rnd = new Random(2);						// always use the same seed so we can generate the same dataset.
 			neuronPlots = new List<NeuronPlot>();
 			pnlScope.Initialized();
 
 			int m = 60;				// grid size
-			int c = 6;				// # of connections each neuron makes
-			int d = 20;				// max distance of each connection.			Must be multiple of 2
-			int r = 6;				// radius (as a square) of connections.		Must be multiple of 2
+			int c = 4;				// # of connections each neuron makes
+			int d = 2;				// max distance of each connection.			Must be multiple of 2
+			int r = 4;				// radius (as a square) of connections.		Must be multiple of 2
+			int p = 10;
+
+			// Does some interesting stuff, but not yet what I'm looking for.
+			//int m = 60;				// grid size
+			//int c = 6;				// # of connections each neuron makes
+			//int d = 10;				// max distance of each connection.			Must be multiple of 2
+			//int r = 6;				// radius (as a square) of connections.		Must be multiple of 2
 
 			// A really interesting pattern:
 			//int m = 60;				// grid size
@@ -86,21 +93,23 @@ namespace neurosim
 			}
 
 			// Each neuron connects to c other neurons in a localized r x r region at a maximum distance of d from the originating neuron.
-			int idx = 0;
 			foreach (NeuronPlot np in neuronPlots)
 			{
-				int x = idx % m;
-				int y = idx / m;
+				int x = np.Location.X / 4;
+				int y = np.Location.Y / 4;
+
+				// Note: rnd.Next(min,max) is inclusive of the lower bound and exclusive of the upper bound.
+				// To avoid introducing bias, we add 1 to the upper bound.
 
 				// Target location:
-				int targetx = x + rnd.Next(-d / 2, d / 2);
-				int targety = y + rnd.Next(-d / 2, d / 2);
+				int targetx = x + rnd.Next(-d / 2, (d / 2) + 1);
+				int targety = y + rnd.Next(-d / 2, (d / 2) + 1);
 
 				for (int i = 0; i < c; i++)
 				{
 					// Connection location around the target.
-					int adjx = targetx + rnd.Next(-r / 2, r / 2);
-					int adjy = targety + rnd.Next(-r / 2, r / 2);
+					int adjx = targetx + rnd.Next(-r / 2, (r / 2) + 1);
+					int adjy = targety + rnd.Next(-r / 2, (r / 2) + 1);
 
 					if (adjx < 0) adjx += m;
 					if (adjy < 0) adjy += m;
@@ -112,12 +121,10 @@ namespace neurosim
 					NeuronPlot npTarget = neuronPlots.Single(np2 => np2.Location.X == qx * 4 & np2.Location.Y == qy * 4);
 					np.Neuron.AddConnection(new Connection(npTarget.Neuron));
 				}
-
-				++idx;
 			}
 
-			// Pick 30 neurons to be pacemakers at different rates.
-			for (int i = 0; i < 30; i++)
+			// Pick p neurons to be pacemakers at different rates.
+			for (int i = 0; i < p; i++)
 			{
 				neuronPlots[rnd.Next(m * m)].Neuron.Leakage = 256 + rnd.Next(256);
 			}
