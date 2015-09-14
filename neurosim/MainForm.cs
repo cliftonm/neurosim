@@ -12,19 +12,42 @@ using System.Xml.Serialization;
 
 namespace neurosim
 {
-	public partial class MainForm : Form
+	public partial class MainForm : Form, ITimeComponent
 	{
+		public const int REFRESH_RATE = 10;
+
 		protected List<NeuronPlot> neuronPlots;
 		protected Neuron pacemakerNeuron;
 		protected Neuron receiverNeuron;
 		protected Timer timer;
 		protected String filename;
 		protected bool paused;
+		protected bool stepping;
+		protected Random rnd;
 
 		public MainForm()
 		{
 			InitializeComponent();
 			Shown += OnShown;
+		}
+
+		public void Tick()
+		{
+			bool networkFired = false;
+			// scopedNeuron.TestPattern();
+			foreach (NeuronPlot np in neuronPlots)
+			{
+				np.Neuron.Tick();
+				networkFired |= np.Neuron.Fired;
+			}
+
+			pnlScope.Tick();
+			pnlNetwork.Tick();
+
+			if (stepping && networkFired)
+			{
+				Pause();
+			}
 		}
 
 		protected void OnShown(object sender, EventArgs e)
@@ -34,9 +57,74 @@ namespace neurosim
 
 		protected void Initialize()
 		{
+			btnStep.Enabled = false;
+
+			rnd = new Random(1);						// always use the same seed so we can generate the same dataset.
 			neuronPlots = new List<NeuronPlot>();
 			pnlScope.Initialized();
 
+			int m = 60;				// grid size
+			int c = 6;				// # of connections each neuron makes
+			int d = 20;				// max distance of each connection.			Must be multiple of 2
+			int r = 6;				// radius (as a square) of connections.		Must be multiple of 2
+
+			// A really interesting pattern:
+			//int m = 60;				// grid size
+			//int c = 7;				// # of connections each neuron makes			// Change c to 6 and it takes a long time to achieve runaway state.
+			//int d = 10;				// max distance of each connection.
+			//int r = 7;				// radius (as a square) of connections.
+
+
+			// Initialize an m x m array of neurons.  The edges wrap top-bottom / left-right.
+			for (int x = 0; x < m; x++)
+			{
+				for (int y = 0; y < m; y++)
+				{
+					Neuron n = new Neuron();
+					neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(x * 4, y * 4) });
+				}
+			}
+
+			// Each neuron connects to c other neurons in a localized r x r region at a maximum distance of d from the originating neuron.
+			int idx = 0;
+			foreach (NeuronPlot np in neuronPlots)
+			{
+				int x = idx % m;
+				int y = idx / m;
+
+				// Target location:
+				int targetx = x + rnd.Next(-d / 2, d / 2);
+				int targety = y + rnd.Next(-d / 2, d / 2);
+
+				for (int i = 0; i < c; i++)
+				{
+					// Connection location around the target.
+					int adjx = targetx + rnd.Next(-r / 2, r / 2);
+					int adjy = targety + rnd.Next(-r / 2, r / 2);
+
+					if (adjx < 0) adjx += m;
+					if (adjy < 0) adjy += m;
+
+					int qx = adjx % m;
+					int qy = adjy % m;
+
+					// Find the neuron at this location
+					NeuronPlot npTarget = neuronPlots.Single(np2 => np2.Location.X == qx * 4 & np2.Location.Y == qy * 4);
+					np.Neuron.AddConnection(new Connection(npTarget.Neuron));
+				}
+
+				++idx;
+			}
+
+			// Pick 30 neurons to be pacemakers at different rates.
+			for (int i = 0; i < 30; i++)
+			{
+				neuronPlots[rnd.Next(m * m)].Neuron.Leakage = 256 + rnd.Next(256);
+			}
+
+			pnlNetwork.SetPlots(neuronPlots);
+
+			/*
 			pacemakerNeuron = new Neuron();
 			pacemakerNeuron.Leakage = 2 << 8;
 			pacemakerNeuron.Integration = 0;
@@ -48,26 +136,25 @@ namespace neurosim
 			neuronPlots.Add(new NeuronPlot() { Neuron = pacemakerNeuron, Location = new Point(pnlNetwork.Width / 2, pnlNetwork.Height / 2) });
 			neuronPlots.Add(new NeuronPlot() { Neuron = receiverNeuron, Location = new Point(pnlNetwork.Width / 2 + 20, pnlNetwork.Height / 2) });
 
-			pnlNetwork.SetPlots(neuronPlots);
 			pnlScope.AddProbe(pacemakerNeuron, Color.LightBlue);
 			pnlScope.AddProbe(receiverNeuron, Color.Red);
+			*/
 
 			timer = new Timer();
-			timer.Interval = 10;
+			timer.Interval = REFRESH_RATE;
 			timer.Tick += OnTick;
-			timer.Start();
+			Pause();
 		}
 
 		protected void OnTick(object sender, EventArgs e)
 		{
-			// scopedNeuron.TestPattern();
-			foreach (NeuronPlot np in neuronPlots)
-			{
-				np.Neuron.Tick();
-			}
+			timer.Stop();
+			Tick();
 
-			pnlScope.Tick();
-			pnlNetwork.Tick();
+			if (!paused)
+			{
+				timer.Start();
+			}
 		}
 
 		private void mnuNew_Click(object sender, EventArgs e)
@@ -140,28 +227,30 @@ namespace neurosim
 
 		private void btnPauseGo_Click(object sender, EventArgs e)
 		{
-			paused ^= true;
-
-			if (paused)
-			{
-				btnPauseGo.Text = "Resume";
-				Pause();
-			}
-			else
-			{
-				btnPauseGo.Text = "Pause";
-				Resume();
-			}
+			if (paused) Resume(); else Pause();
 		}
 
 		protected void Pause()
 		{
+			paused = true;
+			stepping = false;
+			btnPauseGo.Text = "Resume";
+			btnStep.Enabled = true;
 			timer.Stop();
 		}
 
 		protected void Resume()
 		{
+			paused = false;
+			btnPauseGo.Text = "Pause";
+			btnStep.Enabled = false;
 			timer.Start();
+		}
+
+		private void btnStep_Click(object sender, EventArgs e)
+		{
+			stepping = true;
+			Resume();
 		}
 	}
 }

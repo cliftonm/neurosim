@@ -42,6 +42,7 @@
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.mnuExit = new System.Windows.Forms.ToolStripMenuItem();
 			this.btnPauseGo = new System.Windows.Forms.Button();
+			this.btnStep = new System.Windows.Forms.Button();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -57,9 +58,8 @@
 			// 
 			// pnlScope
 			// 
-			this.pnlScope.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.pnlScope.Location = new System.Drawing.Point(485, 62);
-			this.pnlScope.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.pnlScope.Margin = new System.Windows.Forms.Padding(4);
 			this.pnlScope.Name = "pnlScope";
 			this.pnlScope.Size = new System.Drawing.Size(400, 295);
 			this.pnlScope.TabIndex = 1;
@@ -69,7 +69,7 @@
 			this.pnlNetwork.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.pnlNetwork.Location = new System.Drawing.Point(16, 62);
-			this.pnlNetwork.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.pnlNetwork.Margin = new System.Windows.Forms.Padding(4);
 			this.pnlNetwork.Name = "pnlNetwork";
 			this.pnlNetwork.Size = new System.Drawing.Size(461, 295);
 			this.pnlNetwork.TabIndex = 2;
@@ -164,11 +164,22 @@
 			this.btnPauseGo.UseVisualStyleBackColor = true;
 			this.btnPauseGo.Click += new System.EventHandler(this.btnPauseGo_Click);
 			// 
+			// btnStep
+			// 
+			this.btnStep.Location = new System.Drawing.Point(810, 394);
+			this.btnStep.Name = "btnStep";
+			this.btnStep.Size = new System.Drawing.Size(75, 23);
+			this.btnStep.TabIndex = 6;
+			this.btnStep.Text = "Step";
+			this.btnStep.UseVisualStyleBackColor = true;
+			this.btnStep.Click += new System.EventHandler(this.btnStep_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(897, 482);
+			this.Controls.Add(this.btnStep);
 			this.Controls.Add(this.btnPauseGo);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.pnlNetwork);
@@ -176,7 +187,7 @@
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.menuStrip1);
 			this.MainMenuStrip = this.menuStrip1;
-			this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.Margin = new System.Windows.Forms.Padding(4);
 			this.Name = "MainForm";
 			this.Text = "NeuroSim";
 			this.menuStrip1.ResumeLayout(false);
@@ -202,6 +213,7 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
 		private System.Windows.Forms.ToolStripMenuItem mnuExit;
 		private System.Windows.Forms.Button btnPauseGo;
+		private System.Windows.Forms.Button btnStep;
 	}
 }
 

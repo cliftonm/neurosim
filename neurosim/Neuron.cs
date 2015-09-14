@@ -33,6 +33,17 @@ namespace neurosim
 		public int CurrentMembranePotential { get; set; }
 
 		/// <summary>
+		/// Potential delta per tick in returning to the resting potential for non-action potential depolarization.
+		/// Also applies to hyperpolarization resulting from inhibitory signals (not refractory period.)
+		/// </summary>
+		public int RestingPotentialReturnRate { get; set; }
+
+		/// <summary>
+		/// Potential delta per tick in returning to the resting potential while in refractory period.
+		/// </summary>
+		public int RefractoryRecoveryRate { get; set; }
+
+		/// <summary>
 		/// Positive depolarization leakage.  If non-zero, creates a "pacemaker" neuron.
 		/// </summary>
 		public int Leakage { get; set; }
@@ -43,12 +54,22 @@ namespace neurosim
 		public int ActionPotentialValue { get; set; }
 
 		/// <summary>
+		/// The overshoot of an action potential towards hyperpolarization.
+		/// </summary>
+		public int HyperPolarizationOvershoot { get; set; }
+
+		/// <summary>
 		/// The sum of excitatory and inhibitory signals.  This value is computed per tick and
-		/// is used to determine the CurrentMembranePotential.
+		/// is added to the CurrentMembranePotential.
 		/// </summary>
 		public int Integration { get; set; }
 
 		public State ActionState { get { return actionState; } }
+
+		/// <summary>
+		/// Returns true if the neuron has fired.
+		/// </summary>
+		public bool Fired { get; set; }
 
 		protected int testPatternDir = 1;
 		protected State actionState;
@@ -64,6 +85,9 @@ namespace neurosim
 			CurrentMembranePotential = -65 << 8;
 			ActionPotentialThreshold = -35 << 8;
 			ActionPotentialValue = 40 << 8;
+			RefractoryRecoveryRate = 1 << 8;
+			HyperPolarizationOvershoot = 20 << 8;
+			RestingPotentialReturnRate = 8;
 		}
 
 		public void AddConnection(Connection c)
@@ -82,26 +106,38 @@ namespace neurosim
 			{
 				case State.Integrating:
 					Integrate();
-					FireOnActionPotential();
+					Fired = FireOnActionPotential();
+					
+					if (!Fired)
+					{
+						// Incrementally return to resting potential.
+						int dir = Math.Sign(RestingPotential - CurrentMembranePotential);
+						// Get the min delta so that we return exactly to the resting potential on the last step.
+						int minDelta = Math.Min(RestingPotentialReturnRate, Math.Abs(RestingPotential - CurrentMembranePotential));	
+						CurrentMembranePotential += minDelta * dir;
+					}
+
 					break;
 
 				case State.Firing:
+					Fired = false;
 					++actionState;		// hold for one 1 tick
 					break;
 
 				case State.RefractoryStart:
 					// refactory period start
-					CurrentMembranePotential = RestingPotential - (20 << 8) + Integration;
+					CurrentMembranePotential = RestingPotential - HyperPolarizationOvershoot;
 					++actionState;
 					break;
 
 				case State.AbsoluteRefractory:
 					// refactory period, linear ramp back to the resting potential.
-					CurrentMembranePotential += (1 << 8);
+					CurrentMembranePotential += RefractoryRecoveryRate;
 
 					if (CurrentMembranePotential >= RestingPotential)
 					{
-						// Done with refactory period.
+						// Done with absolute refractory period.
+						inputs.Clear();		// The neuron doesn't integrate any inputs during the absolute refractory period.
 						actionState = State.Integrating;
 					}
 
@@ -145,17 +181,27 @@ namespace neurosim
 		protected void Integrate()
 		{
 			CurrentMembranePotential += Leakage;
-			inputs.ForEach(v => CurrentMembranePotential += v);
+			Integration = 0;
+			inputs.ForEach(v => Integration += v);
+			CurrentMembranePotential += Integration;
+
+			// We use the HP overshoot so that we don't exceed the floor of the membrane potential.
+			CurrentMembranePotential = Math.Max(CurrentMembranePotential, RestingPotential - HyperPolarizationOvershoot);
 			inputs.Clear();
 		}
 
-		protected void FireOnActionPotential()
+		protected bool FireOnActionPotential()
 		{
+			bool ret = false;
+
 			if (CurrentMembranePotential >= ActionPotentialThreshold)
 			{
+				ret = true;
 				ActionPotential();
 				TriggerConnections();
 			}
+
+			return ret;
 		}
 	}
 }

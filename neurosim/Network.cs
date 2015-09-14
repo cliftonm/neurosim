@@ -49,8 +49,10 @@ namespace neurosim
 				switch (np.Neuron.ActionState)
 				{
 					case Neuron.State.Integrating:
-						int offset = np.Neuron.ActionPotentialValue - np.Neuron.CurrentMembranePotential;
-						int cval = (255 - (offset >> 8)).Min(0);
+						int offset = np.Neuron.ActionPotentialThreshold - np.Neuron.CurrentMembranePotential;
+						int range = np.Neuron.ActionPotentialThreshold - np.Neuron.RestingPotential;
+						int percent = 255 - (offset * 255 / range);
+						int cval = percent.Min(0).Max(255);
 						color = Color.FromArgb(0, cval, 0);
 						break;
 

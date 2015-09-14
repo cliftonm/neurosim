@@ -12,5 +12,10 @@ namespace neurosim
 		{
 			return v < minVal ? minVal : v;
 		}
+
+		public static int Max(this int v, int maxVal)
+		{
+			return v < maxVal ? v : maxVal;
+		}
 	}
 }

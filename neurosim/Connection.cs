@@ -28,7 +28,7 @@ namespace neurosim
 			switch (mode)
 			{
 				case Mode.Excitatory:
-					neuron.AddInput(5 << 8);
+					neuron.AddInput(8 << 8);
 					break;
 
 				case Mode.Inhibitory:
