@@ -23,7 +23,6 @@ namespace neurosim
 			vFont = new Font("Consolas", 8);
 			vBrush = new SolidBrush(Color.Green);
 			dataPen = new Pen(Color.White);
-			BackgroundBrush = new SolidBrush(Color.Black);
 			buffer = new List<int>();
 		}
 

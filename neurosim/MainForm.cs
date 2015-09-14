@@ -12,6 +12,7 @@ namespace neurosim
 {
 	public partial class MainForm : Form
 	{
+		protected List<NeuronPlot> neuronPlots;
 		protected Neuron scopedNeuron;
 		protected Timer timer;
 
@@ -28,8 +29,15 @@ namespace neurosim
 
 		protected void Initialize()
 		{
+			neuronPlots = new List<NeuronPlot>();
+
 			scopedNeuron = new Neuron();
-			scopedNeuron.Leakage = 2;
+			scopedNeuron.Leakage = 2 << 8;
+			scopedNeuron.Integration = 0;
+
+			neuronPlots.Add(new NeuronPlot() { Neuron = scopedNeuron, Location = new Point(pnlNetwork.Width / 2, pnlNetwork.Height / 2) });
+
+			pnlNetwork.Plots = neuronPlots;
 
 			timer = new Timer();
 			timer.Interval = 10;
@@ -41,8 +49,9 @@ namespace neurosim
 		{
 			// scopedNeuron.TestPattern();
 			scopedNeuron.Tick();
-			pnlScope.NewValue(scopedNeuron.CurrentMembranePotential);
+			pnlScope.NewValue(scopedNeuron.CurrentMembranePotential >> 8);
 			pnlScope.Tick();
+			pnlNetwork.Tick();
 		}
 	}
 }

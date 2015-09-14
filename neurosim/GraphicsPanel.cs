@@ -16,6 +16,7 @@ namespace neurosim
 		public GraphicsPanel()
 		{
 			DoubleBuffered = true;
+			BackgroundBrush = new SolidBrush(Color.Black);
 		}
 
 		protected override void OnPaint(PaintEventArgs e)

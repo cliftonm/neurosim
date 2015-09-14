@@ -30,6 +30,8 @@
 		{
 			this.label1 = new System.Windows.Forms.Label();
 			this.pnlScope = new neurosim.Scope();
+			this.pnlNetwork = new neurosim.Network();
+			this.label2 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -49,11 +51,31 @@
 			this.pnlScope.Size = new System.Drawing.Size(300, 240);
 			this.pnlScope.TabIndex = 1;
 			// 
+			// pnlNetwork
+			// 
+			this.pnlNetwork.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.pnlNetwork.Location = new System.Drawing.Point(9, 29);
+			this.pnlNetwork.Name = "pnlNetwork";
+			this.pnlNetwork.Size = new System.Drawing.Size(346, 240);
+			this.pnlNetwork.TabIndex = 2;
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(135, 10);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(81, 13);
+			this.label2.TabIndex = 3;
+			this.label2.Text = "Neural Network";
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(673, 392);
+			this.Controls.Add(this.label2);
+			this.Controls.Add(this.pnlNetwork);
 			this.Controls.Add(this.pnlScope);
 			this.Controls.Add(this.label1);
 			this.Name = "MainForm";
@@ -67,6 +89,8 @@
 
 		private System.Windows.Forms.Label label1;
 		private Scope pnlScope;
+		private Network pnlNetwork;
+		private System.Windows.Forms.Label label2;
 	}
 }
 
