@@ -16,17 +16,17 @@ namespace neurosim
 		protected FastPixel fp;
 		protected Color[] countDownColor = new Color[]
 		{
-			Color.Black,       // 0
-			Color.DarkGray,    // 1
-			Color.Gray,        // 2
-			Color.DarkGreen,   // 3
-			Color.DarkBlue,    // 4
-			Color.Blue,        // 5
-			Color.Green,	   // 6
-			Color.Cyan,		   // 7
-			Color.LightBlue,   // 8
-			Color.LightGreen,  // 9
-			Color.White		   // 10
+			Color.FromArgb(0, 0, 0),		  // 0
+			Color.FromArgb(64, 0, 0),    // 1
+			Color.FromArgb(128, 0, 0),    // 2
+			Color.FromArgb(192, 0, 0),    // 3
+			Color.FromArgb(255, 64, 0),    // 4
+			Color.FromArgb(255, 128, 0),    // 5
+			Color.FromArgb(255, 192, 0),	  // 6
+			Color.FromArgb(255, 255, 64),	  // 7
+			Color.FromArgb(255, 255, 128),    // 8
+			Color.FromArgb(255, 255, 192),    // 9
+			Color.FromArgb(255, 255, 255),	  // 10
 		};
 
 		public Network()
@@ -91,8 +91,8 @@ namespace neurosim
 			switch (np.Neuron.ActionState)
 			{
 				case Neuron.State.Integrating:
-					int offset = np.Neuron.ActionPotentialThreshold - np.Neuron.CurrentMembranePotential;
-					int range = np.Neuron.ActionPotentialThreshold - np.Neuron.RestingPotential;
+					int offset = np.Neuron.Config.ActionPotentialThreshold - np.Neuron.CurrentMembranePotential;
+					int range = np.Neuron.Config.ActionPotentialThreshold - np.Neuron.Config.RestingPotential;
 					int percent = 255 - (offset * 255 / range);
 					int cval = percent.Min(0).Max(255);
 					color = Color.FromArgb(0, cval, 0);

@@ -63,7 +63,8 @@ namespace neurosim
 			neuronPlots = new List<NeuronPlot>();
 			pnlScope.Initialized();
 
-			int m = 60;				// grid size
+			int mx = 60; // pnlNetwork.Width / 4;
+			int my = 60; // pnlNetwork.Height / 4;
 			int c = 4;				// # of connections each neuron makes
 			int d = 2;				// max distance of each connection.			Must be multiple of 2
 			int r = 4;				// radius (as a square) of connections.		Must be multiple of 2
@@ -83,9 +84,9 @@ namespace neurosim
 
 
 			// Initialize an m x m array of neurons.  The edges wrap top-bottom / left-right.
-			for (int x = 0; x < m; x++)
+			for (int x = 0; x < mx; x++)
 			{
-				for (int y = 0; y < m; y++)
+				for (int y = 0; y < my; y++)
 				{
 					Neuron n = new Neuron();
 					neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(x * 4, y * 4) });
@@ -111,11 +112,11 @@ namespace neurosim
 					int adjx = targetx + rnd.Next(-r / 2, (r / 2) + 1);
 					int adjy = targety + rnd.Next(-r / 2, (r / 2) + 1);
 
-					if (adjx < 0) adjx += m;
-					if (adjy < 0) adjy += m;
+					if (adjx < 0) adjx += mx;
+					if (adjy < 0) adjy += my;
 
-					int qx = adjx % m;
-					int qy = adjy % m;
+					int qx = adjx % mx;
+					int qy = adjy % my;
 
 					// Find the neuron at this location
 					NeuronPlot npTarget = neuronPlots.Single(np2 => np2.Location.X == qx * 4 & np2.Location.Y == qy * 4);
@@ -126,7 +127,17 @@ namespace neurosim
 			// Pick p neurons to be pacemakers at different rates.
 			for (int i = 0; i < p; i++)
 			{
-				neuronPlots[rnd.Next(m * m)].Neuron.Leakage = 256 + rnd.Next(256);
+				Neuron n = neuronPlots[rnd.Next(mx * my)].Neuron;
+				// You get more interesting patterns when the leakage is randomized so that pacemaker neurons do not all
+				// fire synchronously.
+				n.Leakage = 256 + rnd.Next(256);			
+				
+				if (i == 0)
+				{
+					pnlScope.AddProbe(n, Color.LightBlue);
+					// Pick the first connecting neuron for a second trace.
+					pnlScope.AddProbe(n.Connections[0].Neuron, Color.Red);
+				}
 			}
 
 			pnlNetwork.SetPlots(neuronPlots);

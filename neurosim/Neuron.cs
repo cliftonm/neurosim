@@ -18,45 +18,14 @@ namespace neurosim
 		}
 
 		/// <summary>
-		/// The quiescent resting potential state of the neuron.
-		/// </summary>
-		public int RestingPotential { get; set; }
-
-		/// <summary>
-		/// The membrane potential threshold that must be achieved for an action potential to occur.
-		/// </summary>
-		public int ActionPotentialThreshold { get; set; }
-
-		/// <summary>
 		/// The current membrane potential.
 		/// </summary>
 		public int CurrentMembranePotential { get; set; }
 
 		/// <summary>
-		/// Potential delta per tick in returning to the resting potential for non-action potential depolarization.
-		/// Also applies to hyperpolarization resulting from inhibitory signals (not refractory period.)
-		/// </summary>
-		public int RestingPotentialReturnRate { get; set; }
-
-		/// <summary>
-		/// Potential delta per tick in returning to the resting potential while in refractory period.
-		/// </summary>
-		public int RefractoryRecoveryRate { get; set; }
-
-		/// <summary>
 		/// Positive depolarization leakage.  If non-zero, creates a "pacemaker" neuron.
 		/// </summary>
 		public int Leakage { get; set; }
-
-		/// <summary>
-		/// The membrane potential value that the neuron goes to on an action potential.
-		/// </summary>
-		public int ActionPotentialValue { get; set; }
-
-		/// <summary>
-		/// The overshoot of an action potential towards hyperpolarization.
-		/// </summary>
-		public int HyperPolarizationOvershoot { get; set; }
 
 		/// <summary>
 		/// The sum of excitatory and inhibitory signals.  This value is computed per tick and
@@ -66,28 +35,45 @@ namespace neurosim
 
 		public State ActionState { get { return actionState; } }
 
+		public List<Connection> Connections { get { return connections; } }
+
 		/// <summary>
 		/// Returns true if the neuron has fired.
 		/// </summary>
 		public bool Fired { get; set; }
 
+		public NeuronConfig Config { get; set; }
+
 		protected int testPatternDir = 1;
 		protected State actionState;
 		protected List<Connection> connections;
 		protected List<int> inputs;
+		protected NeuronConfig config;
 
+		/// <summary>
+		/// Use default configuration for the neuron.
+		/// </summary>
 		public Neuron()
+		{
+			config = NeuronConfig.GetDefault();
+			Initialize();
+		}
+
+		/// <summary>
+		/// Instantiate the neuron with a custom configuration.
+		/// </summary>
+		public Neuron(NeuronConfig config)
+		{
+			this.config = config;
+			Initialize();
+		}
+
+		protected void Initialize()
 		{
 			connections = new List<Connection>();
 			inputs = new List<int>();
 			actionState = State.Integrating;
-			RestingPotential = -65 << 8;
-			CurrentMembranePotential = -65 << 8;
-			ActionPotentialThreshold = -35 << 8;
-			ActionPotentialValue = 40 << 8;
-			RefractoryRecoveryRate = 1 << 8;
-			HyperPolarizationOvershoot = 20 << 8;
-			RestingPotentialReturnRate = 8;
+			CurrentMembranePotential = config.RestingPotential << 8;
 		}
 
 		public void AddConnection(Connection c)
@@ -111,9 +97,9 @@ namespace neurosim
 					if (!Fired)
 					{
 						// Incrementally return to resting potential.
-						int dir = Math.Sign(RestingPotential - CurrentMembranePotential);
+						int dir = Math.Sign(config.RestingPotential - CurrentMembranePotential);
 						// Get the min delta so that we return exactly to the resting potential on the last step.
-						int minDelta = Math.Min(RestingPotentialReturnRate, Math.Abs(RestingPotential - CurrentMembranePotential));	
+						int minDelta = Math.Min(config.RestingPotentialReturnRate, Math.Abs(config.RestingPotential - CurrentMembranePotential));	
 						CurrentMembranePotential += minDelta * dir;
 					}
 
@@ -126,15 +112,15 @@ namespace neurosim
 
 				case State.RefractoryStart:
 					// refactory period start
-					CurrentMembranePotential = RestingPotential - HyperPolarizationOvershoot;
+					CurrentMembranePotential = config.RestingPotential - config.HyperPolarizationOvershoot;
 					++actionState;
 					break;
 
 				case State.AbsoluteRefractory:
 					// refactory period, linear ramp back to the resting potential.
-					CurrentMembranePotential += RefractoryRecoveryRate;
+					CurrentMembranePotential += config.RefractoryRecoveryRate;
 
-					if (CurrentMembranePotential >= RestingPotential)
+					if (CurrentMembranePotential >= config.RestingPotential)
 					{
 						// Done with absolute refractory period.
 						inputs.Clear();		// The neuron doesn't integrate any inputs during the absolute refractory period.
@@ -147,6 +133,11 @@ namespace neurosim
 					// Not implemented.
 					break;
 			}
+		}
+
+		public void PostSynapticAction()
+		{
+			AddInput(config.PostSynapticActionPotential);
 		}
 
 		public void TestPattern()
@@ -166,7 +157,7 @@ namespace neurosim
 
 		protected void ActionPotential()
 		{
-			CurrentMembranePotential = ActionPotentialValue;
+			CurrentMembranePotential = config.ActionPotentialValue;
 			actionState = State.Firing;
 		}
 
@@ -186,7 +177,10 @@ namespace neurosim
 			CurrentMembranePotential += Integration;
 
 			// We use the HP overshoot so that we don't exceed the floor of the membrane potential.
-			CurrentMembranePotential = Math.Max(CurrentMembranePotential, RestingPotential - HyperPolarizationOvershoot);
+			CurrentMembranePotential = Math.Max(CurrentMembranePotential, config.RestingPotential - config.HyperPolarizationOvershoot);
+
+			// CMP limited to not exceed APT -- we're doing this mainly for display purposes.
+			CurrentMembranePotential = Math.Min(CurrentMembranePotential, config.ActionPotentialThreshold);
 			inputs.Clear();
 		}
 
@@ -194,7 +188,7 @@ namespace neurosim
 		{
 			bool ret = false;
 
-			if (CurrentMembranePotential >= ActionPotentialThreshold)
+			if (CurrentMembranePotential >= config.ActionPotentialThreshold)
 			{
 				ret = true;
 				ActionPotential();

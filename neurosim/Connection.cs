@@ -14,12 +14,12 @@ namespace neurosim
 			Inhibitory,
 		}
 
-		protected Neuron neuron;
+		public Neuron Neuron { get; set; }
 		protected Mode mode;
 
 		public Connection(Neuron targetNeuron, Mode mode = Mode.Excitatory)
 		{
-			neuron = targetNeuron;
+			Neuron = targetNeuron;
 			this.mode = mode;
 		}
 
@@ -28,7 +28,7 @@ namespace neurosim
 			switch (mode)
 			{
 				case Mode.Excitatory:
-					neuron.AddInput(20 << 8);		// TODO: User settable.
+					Neuron.PostSynapticAction();
 					break;
 
 				case Mode.Inhibitory:

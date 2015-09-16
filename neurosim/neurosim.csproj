@@ -61,6 +61,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Neuron.cs" />
+    <Compile Include="NeuronConfig.cs" />
     <Compile Include="NeuronPlot.cs" />
     <Compile Include="Probe.cs" />
     <Compile Include="Program.cs" />
