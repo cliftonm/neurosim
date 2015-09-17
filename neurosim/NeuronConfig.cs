@@ -44,7 +44,7 @@ namespace neurosim
 		/// </summary>
 		public int PostSynapticActionPotential { get; set; }
 
-		protected static NeuronConfig DefaultConfiguration = new NeuronConfig();
+		public static NeuronConfig DefaultConfiguration = new NeuronConfig();
 
 		public NeuronConfig()
 		{
@@ -55,11 +55,6 @@ namespace neurosim
 			HyperPolarizationOvershoot = 20 << 8;
 			RestingPotentialReturnRate = 32;
 			PostSynapticActionPotential = 20 << 8;
-		}
-
-		public static NeuronConfig GetDefault()
-		{
-			return DefaultConfiguration;
 		}
 	}
 }

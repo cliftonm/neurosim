@@ -55,7 +55,7 @@ namespace neurosim
 		/// </summary>
 		public Neuron()
 		{
-			config = NeuronConfig.GetDefault();
+			config = NeuronConfig.DefaultConfiguration;
 			Initialize();
 		}
 
@@ -99,8 +99,13 @@ namespace neurosim
 						// Incrementally return to resting potential.
 						int dir = Math.Sign(config.RestingPotential - CurrentMembranePotential);
 						// Get the min delta so that we return exactly to the resting potential on the last step.
-						int minDelta = Math.Min(config.RestingPotentialReturnRate, Math.Abs(config.RestingPotential - CurrentMembranePotential));	
-						CurrentMembranePotential += minDelta * dir;
+
+						if (dir == -1)		// current membrane potential > resting potential, so return at some rate to the resting potential.
+						{
+							CurrentMembranePotential -= config.RestingPotentialReturnRate;
+						}
+						// int minDelta = Math.Min(config.RestingPotentialReturnRate, Math.Abs(config.RestingPotential - CurrentMembranePotential));	
+						// CurrentMembranePotential += minDelta * dir;
 					}
 
 					break;

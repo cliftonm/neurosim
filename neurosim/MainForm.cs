@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -53,6 +54,7 @@ namespace neurosim
 		protected void OnShown(object sender, EventArgs e)
 		{
 			Initialize();
+			BindSliders();
 		}
 
 		protected void Initialize()
@@ -269,6 +271,52 @@ namespace neurosim
 		{
 			stepping = true;
 			Resume();
+		}
+
+		protected void BindSliders()
+		{
+			Bind(tbApThreshold, lblApThresholdValue, NeuronConfig.DefaultConfiguration, "ActionPotentialThreshold");
+			Bind(tbApValue, lblApValueValue, NeuronConfig.DefaultConfiguration, "ActionPotentialValue");
+			Bind(tbHpOvershoot, lblHpOvershootValue, NeuronConfig.DefaultConfiguration, "HyperPolarizationOvershoot");
+			Bind(tbPsap, lblPsapValue, NeuronConfig.DefaultConfiguration, "PostSynapticActionPotential");
+			Bind(tbRp, lblRpValue, NeuronConfig.DefaultConfiguration, "RestingPotential");
+			Bind(tbRprr, lblRprrValue, NeuronConfig.DefaultConfiguration, "RestingPotentialReturnRate");
+			Bind(tbRrr, lblRrrValue, NeuronConfig.DefaultConfiguration, "RefractoryRecoveryRate");
+		}
+
+		/// <summary>
+		/// Convert potential as 24 bit + 8 bit fraction to a value between -1000 and 1000 representing -100mv to 100mv
+		/// </summary>
+		protected int ConvertPotential(int p)
+		{
+			return (p >> 8) * 10 + (p & 0xFF) * 10 / 256;
+		}
+
+		/// <summary>
+		/// Convert a value from -1000 to 1000 to a 24 bit + 8 bit fractional component
+		/// </summary>
+		/// <param name="v"></param>
+		/// <returns></returns>
+		protected int ConvertTrackBar(int v)
+		{
+			return (v / 10) << 8 + (256 * (Math.Abs(v) % 10)) / 10;
+		}
+
+		protected void Bind(TrackBar tb, Label lbl, NeuronConfig config, string field)
+		{
+			Type t = config.GetType();
+			PropertyInfo pi = t.GetProperty(field, BindingFlags.Instance | BindingFlags.Public);
+			int p = (int)pi.GetValue(config);
+			int v = ConvertPotential(p);
+			tb.Value = v;
+			lbl.Text = (v / 10.0).ToString("###.0");
+			tb.ValueChanged += (sender, args) =>
+				{
+					v = tb.Value;
+					lbl.Text = (v / 10.0).ToString("###.0");
+					p = ConvertTrackBar(v);
+					pi.SetValue(config, p);					
+				};
 		}
 	}
 }
