@@ -42,7 +42,11 @@ namespace neurosim
 		/// </summary>
 		public bool Fired { get; set; }
 
-		public NeuronConfig Config { get; set; }
+		public NeuronConfig Config
+		{
+			get { return config; }
+			set { config = value; }
+		}
 
 		protected int testPatternDir = 1;
 		protected State actionState;

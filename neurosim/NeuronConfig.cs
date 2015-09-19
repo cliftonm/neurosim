@@ -53,7 +53,7 @@ namespace neurosim
 			ActionPotentialValue = 40 << 8;
 			RefractoryRecoveryRate = 1 << 8;
 			HyperPolarizationOvershoot = 20 << 8;
-			RestingPotentialReturnRate = 32;
+			RestingPotentialReturnRate = 8; // 32;
 			PostSynapticActionPotential = 20 << 8;
 		}
 	}

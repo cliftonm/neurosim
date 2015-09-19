@@ -65,8 +65,8 @@ namespace neurosim
 			neuronPlots = new List<NeuronPlot>();
 			pnlScope.Initialized();
 
-			int mx = 60; // pnlNetwork.Width / 4;
-			int my = 60; // pnlNetwork.Height / 4;
+			int mx = pnlNetwork.Width / 4;
+			int my = pnlNetwork.Height / 4;
 			int c = 4;				// # of connections each neuron makes
 			int d = 2;				// max distance of each connection.			Must be multiple of 2
 			int r = 4;				// radius (as a square) of connections.		Must be multiple of 2
