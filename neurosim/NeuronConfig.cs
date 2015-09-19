@@ -21,6 +21,8 @@ namespace neurosim
 		/// <summary>
 		/// Potential delta per tick in returning to the resting potential for non-action potential depolarization.
 		/// Also applies to hyperpolarization resulting from inhibitory signals (not refractory period.)
+		/// This value should be negative (to increase potential) as it applies for when the current membrane potential
+		/// is > the resting potential.
 		/// </summary>
 		public int RestingPotentialReturnRate { get; set; }
 
@@ -53,7 +55,7 @@ namespace neurosim
 			ActionPotentialValue = 40 << 8;
 			RefractoryRecoveryRate = 1 << 8;
 			HyperPolarizationOvershoot = 20 << 8;
-			RestingPotentialReturnRate = 8; // 32;
+			RestingPotentialReturnRate = -8;
 			PostSynapticActionPotential = 20 << 8;
 		}
 	}

@@ -77,7 +77,7 @@ namespace neurosim
 			connections = new List<Connection>();
 			inputs = new List<int>();
 			actionState = State.Integrating;
-			CurrentMembranePotential = config.RestingPotential << 8;
+			CurrentMembranePotential = config.RestingPotential;
 		}
 
 		public void AddConnection(Connection c)
@@ -106,7 +106,7 @@ namespace neurosim
 
 						if (dir == -1)		// current membrane potential > resting potential, so return at some rate to the resting potential.
 						{
-							CurrentMembranePotential -= config.RestingPotentialReturnRate;
+							CurrentMembranePotential += config.RestingPotentialReturnRate;
 						}
 						// int minDelta = Math.Min(config.RestingPotentialReturnRate, Math.Abs(config.RestingPotential - CurrentMembranePotential));	
 						// CurrentMembranePotential += minDelta * dir;

@@ -25,6 +25,22 @@ namespace neurosim
 		protected bool paused;
 		protected bool stepping;
 		protected Random rnd;
+		protected DataTable dtStudy;
+		protected DataView dvStudy;
+		protected Dictionary<DataRow, Neuron> rowNeuronMap = new Dictionary<DataRow, Neuron>();
+
+		protected Color[] probeColors = new Color[] 
+		{
+			Color.Cyan,
+			Color.Blue,
+			Color.Red,
+			Color.Orange,
+			Color.Yellow,
+			Color.Purple,
+			Color.LightGreen,
+			Color.Maroon,
+		};
+		protected int probeColorIdx = 0;
 
 		public MainForm()
 		{
@@ -55,15 +71,46 @@ namespace neurosim
 		{
 			Initialize();
 			BindSliders();
+			InitializeStudyView();
+			pnlScope.Initialized();
+			pnlScope.Tick();			// refreshes the display to deal with panel height.
 		}
 
 		protected void Initialize()
 		{
+			neuronPlots = new List<NeuronPlot>();
 			btnStep.Enabled = false;
 
 			rnd = new Random(2);						// always use the same seed so we can generate the same dataset.
+
+			timer = new Timer();
+			timer.Interval = REFRESH_RATE;
+			timer.Tick += OnTick;
+			Pause();
+
+			tcTabs.SelectTab(1);
+		}
+
+		protected void InitializeStudyView()
+		{
+			dtStudy = new DataTable();
+			dtStudy.Columns.Add("n");
+			dtStudy.Columns.Add("RP");
+			dtStudy.Columns.Add("APT");
+			dtStudy.Columns.Add("APV");
+			dtStudy.Columns.Add("RRR");
+			dtStudy.Columns.Add("HPO");
+			dtStudy.Columns.Add("RPRR");
+			dtStudy.Columns.Add("PSAP");
+			dtStudy.Columns.Add("LKG");
+			dtStudy.Columns.Add("PCOLOR");
+			dvStudy = new DataView(dtStudy);
+			dgvStudy.DataSource = dvStudy;
+		}
+
+		protected void CreateNetwork()
+		{
 			neuronPlots = new List<NeuronPlot>();
-			pnlScope.Initialized();
 
 			int mx = pnlNetwork.Width / 4;
 			int my = pnlNetwork.Height / 4;
@@ -72,20 +119,7 @@ namespace neurosim
 			int r = 4;				// radius (as a square) of connections.		Must be multiple of 2
 			int p = 10;
 
-			// Does some interesting stuff, but not yet what I'm looking for.
-			//int m = 60;				// grid size
-			//int c = 6;				// # of connections each neuron makes
-			//int d = 10;				// max distance of each connection.			Must be multiple of 2
-			//int r = 6;				// radius (as a square) of connections.		Must be multiple of 2
-
-			// A really interesting pattern:
-			//int m = 60;				// grid size
-			//int c = 7;				// # of connections each neuron makes			// Change c to 6 and it takes a long time to achieve runaway state.
-			//int d = 10;				// max distance of each connection.
-			//int r = 7;				// radius (as a square) of connections.
-
-
-			// Initialize an m x m array of neurons.  The edges wrap top-bottom / left-right.
+			// Initialize an mx x my array of neurons.  The edges wrap top-bottom / left-right.
 			for (int x = 0; x < mx; x++)
 			{
 				for (int y = 0; y < my; y++)
@@ -159,11 +193,6 @@ namespace neurosim
 			pnlScope.AddProbe(pacemakerNeuron, Color.LightBlue);
 			pnlScope.AddProbe(receiverNeuron, Color.Red);
 			*/
-
-			timer = new Timer();
-			timer.Interval = REFRESH_RATE;
-			timer.Tick += OnTick;
-			Pause();
 		}
 
 		protected void OnTick(object sender, EventArgs e)
@@ -317,6 +346,92 @@ namespace neurosim
 					p = ConvertTrackBar(v);
 					pi.SetValue(config, p);					
 				};
+		}
+
+		/// <summary>
+		/// Add a study neuron using the default neuron config.
+		/// </summary>
+		private void btnAddNeuron_Click(object sender, EventArgs e)
+		{
+			Neuron n = new Neuron();
+			AddNeuron(n, dtStudy, NeuronConfig.DefaultConfiguration);
+			pnlScope.AddProbe(n, probeColors[probeColorIdx]);
+			probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
+			neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(pnlNetwork.Width / 2 + 20, pnlNetwork.Height / 2) });
+		}
+
+		private void btnRemoveNeuron_Click(object sender, EventArgs e)
+		{
+			// remove entry from rowNeuronMap.			
+			// remove entry from pnlScope probes
+			// remove entry from neuronPlots
+			// remove the row from the DataTable.
+		}
+
+		private void btnCreate_Click(object sender, EventArgs e)
+		{
+			CreateNetwork();
+		}
+
+		protected void AddNeuron(Neuron n, DataTable dt, NeuronConfig cfg)
+		{
+			DataRow row = dt.NewRow();
+			row["n"] = dt.Rows.Count + 1;
+			row["RP"] = cfg.RestingPotential.ToDisplayValue();
+			row["APT"] = cfg.ActionPotentialThreshold.ToDisplayValue();
+			row["APV"] = cfg.ActionPotentialValue.ToDisplayValue();
+			row["RRR"] = cfg.RefractoryRecoveryRate.ToDisplayValue();
+			row["HPO"] = cfg.HyperPolarizationOvershoot.ToDisplayValue();
+			row["RPRR"] = cfg.RestingPotentialReturnRate.ToDisplayValue();
+			row["PSAP"] = cfg.PostSynapticActionPotential.ToDisplayValue();
+			row["LKG"] = "0";
+			row["PCOLOR"] = probeColors[probeColorIdx];
+			dt.Rows.Add(row);
+			rowNeuronMap[row] = n;
+		}
+
+		private void dgvStudy_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+		{
+			string[] colProps = new string[] 
+			{
+				"RestingPotential",
+				"ActionPotentialThreshold",
+				"ActionPotentialValue",
+				"RefractoryRecoveryRate",
+				"HyperPolarizationOvershoot",
+				"RestingPotentialReturnRate",
+				"PostSynapticActionPotential",
+				"Leakage",
+			};
+
+			if (e.ColumnIndex > 0)			// don't change the row id
+			{
+				Neuron n = rowNeuronMap[dvStudy[e.RowIndex].Row];
+				UpdateProperty(n, colProps[e.ColumnIndex - 1], dvStudy[e.RowIndex][e.ColumnIndex].ToString());
+			}
+		}
+
+		/// <summary>
+		/// Geez, might have been easier to just have a big switch statement to set the individual properties.
+		/// </summary>
+		private void UpdateProperty(Neuron n, string propName, string newVal)
+		{
+			Type t;
+			object obj;
+
+			if (propName == "Leakage")
+			{
+				t = n.GetType();
+				obj = n;
+			}
+			else
+			{
+				t = n.Config.GetType();
+				obj = n.Config;
+			}
+
+			PropertyInfo pi = t.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
+			pi.SetValue(obj, newVal.ToPotential());
 		}
 	}
 }
