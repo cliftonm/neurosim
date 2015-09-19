@@ -27,7 +27,7 @@ namespace neurosim
 
 		public void Tick()
 		{
-			NewValue(neuron.CurrentMembranePotential >> 8);
+			NewValue(neuron.CurrentMembranePotential / 256);
 		}
 
 		public void NewValue(int val)

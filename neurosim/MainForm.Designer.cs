@@ -109,7 +109,7 @@
             this.fileToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(673, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(790, 24);
 			this.menuStrip1.TabIndex = 4;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
@@ -174,7 +174,7 @@
 			// 
 			// btnPauseGo
 			// 
-			this.btnPauseGo.Location = new System.Drawing.Point(608, 296);
+			this.btnPauseGo.Location = new System.Drawing.Point(721, 247);
 			this.btnPauseGo.Margin = new System.Windows.Forms.Padding(2);
 			this.btnPauseGo.Name = "btnPauseGo";
 			this.btnPauseGo.Size = new System.Drawing.Size(56, 19);
@@ -185,7 +185,7 @@
 			// 
 			// btnStep
 			// 
-			this.btnStep.Location = new System.Drawing.Point(608, 320);
+			this.btnStep.Location = new System.Drawing.Point(721, 271);
 			this.btnStep.Margin = new System.Windows.Forms.Padding(2);
 			this.btnStep.Name = "btnStep";
 			this.btnStep.Size = new System.Drawing.Size(56, 19);
@@ -202,7 +202,7 @@
 			this.tcTabs.Margin = new System.Windows.Forms.Padding(2);
 			this.tcTabs.Name = "tcTabs";
 			this.tcTabs.SelectedIndex = 0;
-			this.tcTabs.Size = new System.Drawing.Size(580, 261);
+			this.tcTabs.Size = new System.Drawing.Size(765, 261);
 			this.tcTabs.TabIndex = 7;
 			// 
 			// tabPage1
@@ -228,12 +228,11 @@
 			this.tabPage1.Controls.Add(this.lblRpValue);
 			this.tabPage1.Controls.Add(this.label3);
 			this.tabPage1.Controls.Add(this.tbRp);
-			this.tabPage1.Controls.Add(this.btnCreate);
 			this.tabPage1.Location = new System.Drawing.Point(4, 22);
 			this.tabPage1.Margin = new System.Windows.Forms.Padding(2);
 			this.tabPage1.Name = "tabPage1";
 			this.tabPage1.Padding = new System.Windows.Forms.Padding(2);
-			this.tabPage1.Size = new System.Drawing.Size(572, 235);
+			this.tabPage1.Size = new System.Drawing.Size(757, 235);
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Network";
 			this.tabPage1.UseVisualStyleBackColor = true;
@@ -471,7 +470,7 @@
 			// 
 			// btnCreate
 			// 
-			this.btnCreate.Location = new System.Drawing.Point(513, 5);
+			this.btnCreate.Location = new System.Drawing.Point(721, 215);
 			this.btnCreate.Margin = new System.Windows.Forms.Padding(2);
 			this.btnCreate.Name = "btnCreate";
 			this.btnCreate.Size = new System.Drawing.Size(56, 19);
@@ -489,7 +488,7 @@
 			this.tabPage2.Margin = new System.Windows.Forms.Padding(2);
 			this.tabPage2.Name = "tabPage2";
 			this.tabPage2.Padding = new System.Windows.Forms.Padding(2);
-			this.tabPage2.Size = new System.Drawing.Size(572, 235);
+			this.tabPage2.Size = new System.Drawing.Size(757, 235);
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Study";
 			this.tabPage2.UseVisualStyleBackColor = true;
@@ -524,14 +523,12 @@
 			this.dgvStudy.Name = "dgvStudy";
 			this.dgvStudy.RowHeadersVisible = false;
 			this.dgvStudy.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-			this.dgvStudy.Size = new System.Drawing.Size(561, 199);
+			this.dgvStudy.Size = new System.Drawing.Size(746, 199);
 			this.dgvStudy.TabIndex = 0;
 			this.dgvStudy.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvStudy_CellEndEdit);
 			// 
 			// pnlNetwork
 			// 
-			this.pnlNetwork.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
 			this.pnlNetwork.Location = new System.Drawing.Point(12, 50);
 			this.pnlNetwork.Name = "pnlNetwork";
 			this.pnlNetwork.Size = new System.Drawing.Size(346, 240);
@@ -548,7 +545,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(673, 567);
+			this.ClientSize = new System.Drawing.Size(790, 567);
 			this.Controls.Add(this.tcTabs);
 			this.Controls.Add(this.btnStep);
 			this.Controls.Add(this.btnPauseGo);
@@ -557,6 +554,7 @@
 			this.Controls.Add(this.pnlScope);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.menuStrip1);
+			this.Controls.Add(this.btnCreate);
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

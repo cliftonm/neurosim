@@ -104,6 +104,7 @@ namespace neurosim
 			dtStudy.Columns.Add("PSAP");
 			dtStudy.Columns.Add("LKG");
 			dtStudy.Columns.Add("PCOLOR");
+			dtStudy.Columns.Add("Conn");
 			dvStudy = new DataView(dtStudy);
 			dgvStudy.DataSource = dvStudy;
 		}
@@ -252,6 +253,7 @@ namespace neurosim
 			filename = String.Empty;
 		}
 
+		/*
 		protected void LoadNetwork(string filename)
 		{
 			this.filename = filename;
@@ -271,6 +273,28 @@ namespace neurosim
 			XmlSerializer xs = new XmlSerializer(neuronPlots.GetType());
 	        FileStream fs = File.Create(filename);
 			xs.Serialize(fs, neuronPlots);
+			fs.Close();
+		}
+		*/
+
+		// TODO: Only saves study datatable right now.
+
+		protected void LoadNetwork(string filename)
+		{
+			this.filename = filename;
+			FileStream fs = File.Open(filename, FileMode.Open);
+			dtStudy = dtStudy.Deserialize(fs);			// awkward.
+			dvStudy = new DataView(dtStudy);
+			dgvStudy.DataSource = dvStudy;
+			UpdatePlotters(dtStudy);
+			fs.Close();
+		}
+
+		protected void SaveNetwork(string filename)
+		{
+			this.filename = filename;
+			FileStream fs = File.Create(filename);
+			dtStudy.Serialize(fs);
 			fs.Close();
 		}
 
@@ -318,7 +342,7 @@ namespace neurosim
 		/// </summary>
 		protected int ConvertPotential(int p)
 		{
-			return (p >> 8) * 10 + (p & 0xFF) * 10 / 256;
+			return (p / 256) * 10 + ((Math.Abs(p) & 0xFF) * 10 / 256) * Math.Sign(p);
 		}
 
 		/// <summary>
@@ -328,7 +352,7 @@ namespace neurosim
 		/// <returns></returns>
 		protected int ConvertTrackBar(int v)
 		{
-			return (v / 10) << 8 + (256 * (Math.Abs(v) % 10)) / 10;
+			return ((v / 10) << 8) + ((256 * (Math.Abs(v) % 10)) / 10) * Math.Sign(v);
 		}
 
 		protected void Bind(TrackBar tb, Label lbl, NeuronConfig config, string field)
@@ -356,8 +380,9 @@ namespace neurosim
 			Neuron n = new Neuron();
 			AddNeuron(n, dtStudy, NeuronConfig.DefaultConfiguration);
 			pnlScope.AddProbe(n, probeColors[probeColorIdx]);
+			neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(pnlNetwork.Width + 20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
 			probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
-			neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(pnlNetwork.Width / 2 + 20, pnlNetwork.Height / 2) });
+			pnlNetwork.SetPlots(neuronPlots);
 		}
 
 		private void btnRemoveNeuron_Click(object sender, EventArgs e)
@@ -392,6 +417,13 @@ namespace neurosim
 
 		private void dgvStudy_CellEndEdit(object sender, DataGridViewCellEventArgs e)
 		{
+			Neuron n = rowNeuronMap[dvStudy[e.RowIndex].Row];
+			DataRow row = dvStudy[e.RowIndex].Row;
+			UpdateNeuronProperty(n, row, e.ColumnIndex);
+		}
+
+		protected void UpdateNeuronProperty(Neuron n, DataRow row, int colIdx)
+		{
 			string[] colProps = new string[] 
 			{
 				"RestingPotential",
@@ -401,37 +433,67 @@ namespace neurosim
 				"HyperPolarizationOvershoot",
 				"RestingPotentialReturnRate",
 				"PostSynapticActionPotential",
-				"Leakage",
 			};
 
-			if (e.ColumnIndex > 0)			// don't change the row id
+			string newVal = row[colIdx].ToString();
+
+			switch (colIdx)
 			{
-				Neuron n = rowNeuronMap[dvStudy[e.RowIndex].Row];
-				UpdateProperty(n, colProps[e.ColumnIndex - 1], dvStudy[e.RowIndex][e.ColumnIndex].ToString());
+				case 0:					// row index is not allowed to be changed
+					break;
+
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+				case 7:					// The 7 neuron parameters
+					n.Leakage = newVal.ToPotential();
+					break;
+
+				case 8:					// Leakage
+					break;
+
+				case 9:					// probe color
+					UpdateProperty(n, colProps[colIdx - 1], newVal);
+					break;
+
+				case 10:				// connections
+					break;
 			}
 		}
 
-		/// <summary>
-		/// Geez, might have been easier to just have a big switch statement to set the individual properties.
-		/// </summary>
 		private void UpdateProperty(Neuron n, string propName, string newVal)
 		{
-			Type t;
-			object obj;
-
-			if (propName == "Leakage")
-			{
-				t = n.GetType();
-				obj = n;
-			}
-			else
-			{
-				t = n.Config.GetType();
-				obj = n.Config;
-			}
-
+			Type t = n.Config.GetType();
+			object obj = n.Config;
 			PropertyInfo pi = t.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
 			pi.SetValue(obj, newVal.ToPotential());
+		}
+
+		protected void UpdatePlotters(DataTable dt)
+		{
+			rowNeuronMap.Clear();
+			neuronPlots.Clear();
+			probeColorIdx = 0;
+
+			foreach (DataRow row in dt.Rows)
+			{
+				Neuron n = new Neuron();
+				rowNeuronMap[row] = n;
+
+				for (int colIdx = 1; colIdx <= 7; ++colIdx)
+				{
+					UpdateNeuronProperty(n, row, colIdx);
+				}
+
+				pnlScope.AddProbe(n, probeColors[probeColorIdx]);
+				neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(pnlNetwork.Width + 20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
+				probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
+			}
+
+			pnlNetwork.SetPlots(neuronPlots);
 		}
 	}
 }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace neurosim
 {
@@ -22,9 +24,10 @@ namespace neurosim
 		/// Convert a neuron potential integer composed of upper 8 bits integer and lower 8 bits as fraction
 		/// to a string with two decimal places.
 		/// </summary>
-		public static string ToDisplayValue(this int n)
+		public static string ToDisplayValue(this int p)
 		{
-			decimal d = (n >> 8) + ((decimal)(n & 0xFF) / 256) / 100;
+			// decimal d = (n / 256) + ((decimal)(n & 0xFF) / 256) / 100;
+			decimal d = ((p / 256) * 10 + ((Math.Abs(p) & 0xFF) * 10 / 256) * Math.Sign(p)) / 10M;
 
 			return d.ToString("###0.00");
 		}
@@ -42,5 +45,17 @@ namespace neurosim
 
 			return ret;
 		}
+
+		public static void Serialize(this DataTable dt, Stream stream)
+		{
+			BinaryFormatter serializer = new BinaryFormatter();
+			serializer.Serialize(stream, dt);
+		}
+
+		public static DataTable Deserialize(this DataTable dt, Stream stream)
+		{
+			BinaryFormatter serializer = new BinaryFormatter();
+			return (DataTable)serializer.Deserialize(stream);
+		} 
 	}
 }
