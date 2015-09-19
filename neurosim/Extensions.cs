@@ -26,10 +26,9 @@ namespace neurosim
 		/// </summary>
 		public static string ToDisplayValue(this int p)
 		{
-			// decimal d = (n / 256) + ((decimal)(n & 0xFF) / 256) / 100;
 			decimal d = ((p / 256) * 10 + ((Math.Abs(p) & 0xFF) * 10 / 256) * Math.Sign(p)) / 10M;
 
-			return d.ToString("###0.00");
+			return d.ToString("###0.0");
 		}
 
 		/// <summary>

@@ -229,6 +229,10 @@ namespace neurosim
 			{
 				mnuSaveAs_Click(sender, e);
 			}
+			else
+			{
+				SaveNetwork(filename);
+			}
 		}
 
 		private void mnuSaveAs_Click(object sender, EventArgs e)
@@ -449,14 +453,14 @@ namespace neurosim
 				case 5:
 				case 6:
 				case 7:					// The 7 neuron parameters
-					n.Leakage = newVal.ToPotential();
+					UpdateProperty(n, colProps[colIdx - 1], newVal);
 					break;
 
 				case 8:					// Leakage
+					n.Leakage = newVal.ToPotential();
 					break;
 
 				case 9:					// probe color
-					UpdateProperty(n, colProps[colIdx - 1], newVal);
 					break;
 
 				case 10:				// connections
@@ -487,6 +491,7 @@ namespace neurosim
 				{
 					UpdateNeuronProperty(n, row, colIdx);
 				}
+				n.Leakage = row["LKG"].ToString().ToPotential();
 
 				pnlScope.AddProbe(n, probeColors[probeColorIdx]);
 				neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(pnlNetwork.Width + 20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
