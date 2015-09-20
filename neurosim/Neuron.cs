@@ -144,9 +144,9 @@ namespace neurosim
 			}
 		}
 
-		public void PostSynapticAction()
+		public void PostSynapticAction(int psap)
 		{
-			AddInput(config.PostSynapticActionPotential);
+			AddInput(psap);
 		}
 
 		public void TestPattern()

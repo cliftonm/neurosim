@@ -8,32 +8,26 @@ namespace neurosim
 {
 	public class Connection
 	{
-		public enum Mode
+		public enum CMode
 		{
 			Excitatory,
 			Inhibitory,
 		}
 
 		public Neuron Neuron { get; set; }
-		protected Mode mode;
+		public CMode Mode { get { return postSynapticActionPotential < 0 ? CMode.Inhibitory : CMode.Excitatory; } }
 
-		public Connection(Neuron targetNeuron, Mode mode = Mode.Excitatory)
+		protected int postSynapticActionPotential;
+
+		public Connection(Neuron targetNeuron, int psap = 20<<8)
 		{
 			Neuron = targetNeuron;
-			this.mode = mode;
+			postSynapticActionPotential = psap;
 		}
 
 		public void Fire()
 		{
-			switch (mode)
-			{
-				case Mode.Excitatory:
-					Neuron.PostSynapticAction();
-					break;
-
-				case Mode.Inhibitory:
-					break;
-			}
+			Neuron.PostSynapticAction(postSynapticActionPotential);
 		}
 	}
 }

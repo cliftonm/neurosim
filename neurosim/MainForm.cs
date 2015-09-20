@@ -11,11 +11,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
+using Clifton.Extensions;
+
 namespace neurosim
 {
 	public partial class MainForm : Form, ITimeComponent
 	{
-		public const int REFRESH_RATE = 60;
+		public const int REFRESH_RATE = 30;
 
 		protected List<NeuronPlot> neuronPlots;
 		protected Neuron pacemakerNeuron;
@@ -32,7 +34,7 @@ namespace neurosim
 		protected Color[] probeColors = new Color[] 
 		{
 			Color.Cyan,
-			Color.Blue,
+			Color.LightBlue,
 			Color.Red,
 			Color.Orange,
 			Color.Yellow,
@@ -101,7 +103,6 @@ namespace neurosim
 			dtStudy.Columns.Add("RRR");
 			dtStudy.Columns.Add("HPO");
 			dtStudy.Columns.Add("RPRR");
-			dtStudy.Columns.Add("PSAP");
 			dtStudy.Columns.Add("LKG");
 			dtStudy.Columns.Add("PCOLOR");
 			dtStudy.Columns.Add("Conn");
@@ -291,6 +292,7 @@ namespace neurosim
 			dvStudy = new DataView(dtStudy);
 			dgvStudy.DataSource = dvStudy;
 			UpdatePlotters(dtStudy);
+			UpdateConnections(dtStudy);
 			fs.Close();
 		}
 
@@ -335,7 +337,7 @@ namespace neurosim
 			Bind(tbApThreshold, lblApThresholdValue, NeuronConfig.DefaultConfiguration, "ActionPotentialThreshold");
 			Bind(tbApValue, lblApValueValue, NeuronConfig.DefaultConfiguration, "ActionPotentialValue");
 			Bind(tbHpOvershoot, lblHpOvershootValue, NeuronConfig.DefaultConfiguration, "HyperPolarizationOvershoot");
-			Bind(tbPsap, lblPsapValue, NeuronConfig.DefaultConfiguration, "PostSynapticActionPotential");
+			// Bind(tbPsap, lblPsapValue, NeuronConfig.DefaultConfiguration, "PostSynapticActionPotential");
 			Bind(tbRp, lblRpValue, NeuronConfig.DefaultConfiguration, "RestingPotential");
 			Bind(tbRprr, lblRprrValue, NeuronConfig.DefaultConfiguration, "RestingPotentialReturnRate");
 			Bind(tbRrr, lblRrrValue, NeuronConfig.DefaultConfiguration, "RefractoryRecoveryRate");
@@ -412,7 +414,6 @@ namespace neurosim
 			row["RRR"] = cfg.RefractoryRecoveryRate.ToDisplayValue();
 			row["HPO"] = cfg.HyperPolarizationOvershoot.ToDisplayValue();
 			row["RPRR"] = cfg.RestingPotentialReturnRate.ToDisplayValue();
-			row["PSAP"] = cfg.PostSynapticActionPotential.ToDisplayValue();
 			row["LKG"] = "0";
 			row["PCOLOR"] = probeColors[probeColorIdx];
 			dt.Rows.Add(row);
@@ -436,7 +437,6 @@ namespace neurosim
 				"RefractoryRecoveryRate",
 				"HyperPolarizationOvershoot",
 				"RestingPotentialReturnRate",
-				"PostSynapticActionPotential",
 			};
 
 			string newVal = row[colIdx].ToString();
@@ -452,18 +452,18 @@ namespace neurosim
 				case 4:
 				case 5:
 				case 6:
-				case 7:					// The 7 neuron parameters
 					UpdateProperty(n, colProps[colIdx - 1], newVal);
 					break;
 
-				case 8:					// Leakage
+				case 7:					// Leakage
 					n.Leakage = newVal.ToPotential();
 					break;
 
-				case 9:					// probe color
+				case 8:					// probe color
 					break;
 
-				case 10:				// connections
+				case 9:					// connections
+					UpdateConnections(n, newVal);
 					break;
 			}
 		}
@@ -474,6 +474,32 @@ namespace neurosim
 			object obj = n.Config;
 			PropertyInfo pi = t.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
 			pi.SetValue(obj, newVal.ToPotential());
+		}
+
+		private void UpdateConnections(Neuron n, string val)
+		{
+			string[] connections = val.Split(',');
+			n.Connections.Clear();
+
+			foreach (string conn in connections)
+			{
+				int nidx = conn.LeftOf('(').to_i();
+				int psap = conn.Between('(', ')').to_i() << 8;
+				Neuron targetNeuron = rowNeuronMap[dvStudy[nidx - 1].Row];
+				n.AddConnection(new Connection(targetNeuron, psap));
+			}
+		}
+
+		protected void UpdateConnections(DataTable dt)
+		{
+			foreach (DataRow row in dt.Rows)
+			{
+				if (row["Conn"] != null && !String.IsNullOrEmpty(row["Conn"].ToString()))
+				{
+					Neuron n = rowNeuronMap[row];
+					UpdateConnections(n, row["Conn"].ToString());
+				}
+			}
 		}
 
 		protected void UpdatePlotters(DataTable dt)

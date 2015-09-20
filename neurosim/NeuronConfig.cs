@@ -44,7 +44,7 @@ namespace neurosim
 		/// <summary>
 		/// The input to the neuron when it receives an action potential.
 		/// </summary>
-		public int PostSynapticActionPotential { get; set; }
+		// public int PostSynapticActionPotential { get; set; }
 
 		public static NeuronConfig DefaultConfiguration = new NeuronConfig();
 
@@ -56,7 +56,7 @@ namespace neurosim
 			RefractoryRecoveryRate = 1 << 8;
 			HyperPolarizationOvershoot = 20 << 8;
 			RestingPotentialReturnRate = -8;
-			PostSynapticActionPotential = 20 << 8;
+			// PostSynapticActionPotential = 20 << 8;
 		}
 	}
 }

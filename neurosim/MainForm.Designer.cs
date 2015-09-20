@@ -43,9 +43,6 @@
 			this.btnStep = new System.Windows.Forms.Button();
 			this.tcTabs = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
-			this.lblPsapValue = new System.Windows.Forms.Label();
-			this.label21 = new System.Windows.Forms.Label();
-			this.tbPsap = new System.Windows.Forms.TrackBar();
 			this.lblRprrValue = new System.Windows.Forms.Label();
 			this.label13 = new System.Windows.Forms.Label();
 			this.tbRprr = new System.Windows.Forms.TrackBar();
@@ -64,17 +61,16 @@
 			this.lblRpValue = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
 			this.tbRp = new System.Windows.Forms.TrackBar();
-			this.btnCreate = new System.Windows.Forms.Button();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.btnRemoveNeuron = new System.Windows.Forms.Button();
 			this.btnAddNeuron = new System.Windows.Forms.Button();
 			this.dgvStudy = new System.Windows.Forms.DataGridView();
+			this.btnCreate = new System.Windows.Forms.Button();
 			this.pnlNetwork = new neurosim.Network();
 			this.pnlScope = new neurosim.Scope();
 			this.menuStrip1.SuspendLayout();
 			this.tcTabs.SuspendLayout();
 			this.tabPage1.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.tbPsap)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRprr)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbHpOvershoot)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRrr)).BeginInit();
@@ -207,9 +203,6 @@
 			// 
 			// tabPage1
 			// 
-			this.tabPage1.Controls.Add(this.lblPsapValue);
-			this.tabPage1.Controls.Add(this.label21);
-			this.tabPage1.Controls.Add(this.tbPsap);
 			this.tabPage1.Controls.Add(this.lblRprrValue);
 			this.tabPage1.Controls.Add(this.label13);
 			this.tabPage1.Controls.Add(this.tbRprr);
@@ -236,39 +229,6 @@
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Network";
 			this.tabPage1.UseVisualStyleBackColor = true;
-			// 
-			// lblPsapValue
-			// 
-			this.lblPsapValue.Location = new System.Drawing.Point(346, 210);
-			this.lblPsapValue.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-			this.lblPsapValue.Name = "lblPsapValue";
-			this.lblPsapValue.Size = new System.Drawing.Size(42, 19);
-			this.lblPsapValue.TabIndex = 33;
-			this.lblPsapValue.Text = "0";
-			this.lblPsapValue.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			// 
-			// label21
-			// 
-			this.label21.Location = new System.Drawing.Point(338, 22);
-			this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-			this.label21.Name = "label21";
-			this.label21.Size = new System.Drawing.Size(65, 31);
-			this.label21.TabIndex = 32;
-			this.label21.Text = "PS AP";
-			this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			// 
-			// tbPsap
-			// 
-			this.tbPsap.Location = new System.Drawing.Point(346, 55);
-			this.tbPsap.Margin = new System.Windows.Forms.Padding(2);
-			this.tbPsap.Maximum = 1000;
-			this.tbPsap.Minimum = -1000;
-			this.tbPsap.Name = "tbPsap";
-			this.tbPsap.Orientation = System.Windows.Forms.Orientation.Vertical;
-			this.tbPsap.Size = new System.Drawing.Size(45, 153);
-			this.tbPsap.TabIndex = 31;
-			this.tbPsap.TickFrequency = 200;
-			this.tbPsap.TickStyle = System.Windows.Forms.TickStyle.Both;
 			// 
 			// lblRprrValue
 			// 
@@ -468,17 +428,6 @@
 			this.tbRp.TickFrequency = 200;
 			this.tbRp.TickStyle = System.Windows.Forms.TickStyle.Both;
 			// 
-			// btnCreate
-			// 
-			this.btnCreate.Location = new System.Drawing.Point(721, 215);
-			this.btnCreate.Margin = new System.Windows.Forms.Padding(2);
-			this.btnCreate.Name = "btnCreate";
-			this.btnCreate.Size = new System.Drawing.Size(56, 19);
-			this.btnCreate.TabIndex = 0;
-			this.btnCreate.Text = "Create";
-			this.btnCreate.UseVisualStyleBackColor = true;
-			this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
-			// 
 			// tabPage2
 			// 
 			this.tabPage2.Controls.Add(this.btnRemoveNeuron);
@@ -527,6 +476,17 @@
 			this.dgvStudy.TabIndex = 0;
 			this.dgvStudy.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvStudy_CellEndEdit);
 			// 
+			// btnCreate
+			// 
+			this.btnCreate.Location = new System.Drawing.Point(721, 215);
+			this.btnCreate.Margin = new System.Windows.Forms.Padding(2);
+			this.btnCreate.Name = "btnCreate";
+			this.btnCreate.Size = new System.Drawing.Size(56, 19);
+			this.btnCreate.TabIndex = 0;
+			this.btnCreate.Text = "Create";
+			this.btnCreate.UseVisualStyleBackColor = true;
+			this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+			// 
 			// pnlNetwork
 			// 
 			this.pnlNetwork.Location = new System.Drawing.Point(12, 50);
@@ -564,7 +524,6 @@
 			this.tcTabs.ResumeLayout(false);
 			this.tabPage1.ResumeLayout(false);
 			this.tabPage1.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.tbPsap)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRprr)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbHpOvershoot)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRrr)).EndInit();
@@ -599,9 +558,6 @@
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.Button btnCreate;
 		private System.Windows.Forms.TabPage tabPage2;
-		private System.Windows.Forms.Label lblPsapValue;
-		private System.Windows.Forms.Label label21;
-		private System.Windows.Forms.TrackBar tbPsap;
 		private System.Windows.Forms.Label lblRprrValue;
 		private System.Windows.Forms.TrackBar tbRprr;
 		private System.Windows.Forms.Label lblHpOvershootValue;
