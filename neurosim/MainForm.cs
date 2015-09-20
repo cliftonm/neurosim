@@ -71,6 +71,8 @@ namespace neurosim
 
 		protected void OnShown(object sender, EventArgs e)
 		{
+			pnlNetwork.Chart = new NeuronChart();
+
 			Initialize();
 			BindSliders();
 			InitializeStudyView();
@@ -386,9 +388,10 @@ namespace neurosim
 			Neuron n = new Neuron();
 			AddNeuron(n, dtStudy, NeuronConfig.DefaultConfiguration);
 			pnlScope.AddProbe(n, probeColors[probeColorIdx]);
-			neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(pnlNetwork.Width + 20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
+			neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
 			probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
 			pnlNetwork.SetPlots(neuronPlots);
+			pnlNetwork.Tick();
 		}
 
 		private void btnRemoveNeuron_Click(object sender, EventArgs e)
@@ -520,11 +523,12 @@ namespace neurosim
 				n.Leakage = row["LKG"].ToString().ToPotential();
 
 				pnlScope.AddProbe(n, probeColors[probeColorIdx]);
-				neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(pnlNetwork.Width + 20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
+				neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
 				probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
 			}
 
 			pnlNetwork.SetPlots(neuronPlots);
+			pnlNetwork.Tick();
 		}
 	}
 }

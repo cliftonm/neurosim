@@ -10,28 +10,55 @@ namespace neurosim
 {
 	public class Network : GraphicsPanel, ITimeComponent
 	{
+		public NetworkChart Chart { get; set; }
+
 		protected List<NeuronPlot> plots;
 
 		protected Bitmap bitmap;
 		protected FastPixel fp;
-		protected Color[] countDownColor = new Color[]
-		{
-			Color.FromArgb(0, 0, 0),		  // 0
-			Color.FromArgb(64, 0, 0),    // 1
-			Color.FromArgb(128, 0, 0),    // 2
-			Color.FromArgb(192, 0, 0),    // 3
-			Color.FromArgb(255, 64, 0),    // 4
-			Color.FromArgb(255, 128, 0),    // 5
-			Color.FromArgb(255, 192, 0),	  // 6
-			Color.FromArgb(255, 255, 64),	  // 7
-			Color.FromArgb(255, 255, 128),    // 8
-			Color.FromArgb(255, 255, 192),    // 9
-			Color.FromArgb(255, 255, 255),	  // 10
-		};
+		protected int mx = 0, my = 0;
 
 		public Network()
 		{
 			plots = new List<NeuronPlot>();
+			Chart = new CountDownChart();
+
+			MouseDown += OnMouseDown;
+			MouseLeave += OnMouseLeave;
+			MouseMove += OnMouseMove;
+			MouseUp += OnMouseUp;
+		}
+
+		void OnMouseUp(object sender, MouseEventArgs e)
+		{
+			Chart.DeselectObject();
+			Refresh();
+		}
+
+		void OnMouseMove(object sender, MouseEventArgs e)
+		{
+			int dx = e.X - mx;
+			int dy = e.Y - my;
+
+			Chart.MoveObject(new Size(dx, dy));
+			Refresh();
+	
+			mx = e.X;
+			my = e.Y;
+		}
+
+		void OnMouseLeave(object sender, EventArgs e)
+		{
+			Chart.DeselectObject();
+			Refresh();
+		}
+
+		void OnMouseDown(object sender, MouseEventArgs e)
+		{
+			mx = e.X;
+			my = e.Y;
+			Chart.SelectObject(new Point(e.X, e.Y), plots);
+			Refresh();
 		}
 
 		public void SetPlots(List<NeuronPlot> plots)
@@ -54,68 +81,13 @@ namespace neurosim
 			}
 
 			fp.Lock();
-			fp.Clear(Color.Black);
-
-			foreach (NeuronPlot np in plots)
-			{
-				// ShowNeuronBasedOnState(fp, np);
-				ShowNeuronBasedOnFiredCountDown(fp, np);
-			}
-
+			bool updateFromBitmap = Chart.Draw(fp, e.Graphics, plots);
 			fp.Unlock(true);
-			e.Graphics.DrawImage(bitmap, Point.Empty);
-		}
 
-		private void ShowNeuronBasedOnFiredCountDown(FastPixel fp, NeuronPlot np)
-		{
-			if (np.Neuron.ActionState == Neuron.State.Firing)
+			if (updateFromBitmap)
 			{
-				np.FiredCountDown = 11;
+				e.Graphics.DrawImage(bitmap, Point.Empty);
 			}
-
-			if (np.FiredCountDown > 0)
-			{
-				--np.FiredCountDown;
-				Color color = countDownColor[np.FiredCountDown];
-				fp.SetPixel(np.Location, color);
-				fp.SetPixel(np.Location + new Size(1, 0), color);
-				fp.SetPixel(np.Location + new Size(0, 1), color);
-				fp.SetPixel(np.Location + new Size(1, 1), color);
-			}
-		}
-
-		private void ShowNeuronBasedOnState(FastPixel fp, NeuronPlot np)
-		{
-			Color color = Color.Black;
-
-			switch (np.Neuron.ActionState)
-			{
-				case Neuron.State.Integrating:
-					int offset = np.Neuron.Config.ActionPotentialThreshold - np.Neuron.CurrentMembranePotential;
-					int range = np.Neuron.Config.ActionPotentialThreshold - np.Neuron.Config.RestingPotential;
-					int percent = 255 - (offset * 255 / range);
-					int cval = percent.Min(0).Max(255);
-					color = Color.FromArgb(0, cval, 0);
-					break;
-
-				case Neuron.State.Firing:
-					color = Color.White;
-					break;
-
-				case Neuron.State.RefractoryStart:
-				case Neuron.State.AbsoluteRefractory:
-					color = Color.FromArgb(255, 64, 64);
-					break;
-
-				case Neuron.State.RelativeRefractory:
-					color = Color.Yellow;
-					break;
-			}
-
-			fp.SetPixel(np.Location, color);
-			fp.SetPixel(np.Location + new Size(1, 0), color);
-			fp.SetPixel(np.Location + new Size(0, 1), color);
-			fp.SetPixel(np.Location + new Size(1, 1), color);
 		}
 	}
 }

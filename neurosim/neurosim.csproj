@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Connection.cs" />
+    <Compile Include="CountDownChart.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FastPixel.cs" />
     <Compile Include="GraphicsPanel.cs">
@@ -60,7 +61,9 @@
     <Compile Include="Network.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="NetworkChart.cs" />
     <Compile Include="Neuron.cs" />
+    <Compile Include="NeuronChart.cs" />
     <Compile Include="NeuronConfig.cs" />
     <Compile Include="NeuronPlot.cs" />
     <Compile Include="Probe.cs" />
@@ -69,6 +72,7 @@
     <Compile Include="Scope.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="StateChart.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
