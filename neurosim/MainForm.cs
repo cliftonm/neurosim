@@ -108,8 +108,10 @@ namespace neurosim
 			dtStudy.Columns.Add("LKG");
 			dtStudy.Columns.Add("PCOLOR");
 			dtStudy.Columns.Add("Conn");
+			dtStudy.Columns.Add("Location");
 			dvStudy = new DataView(dtStudy);
 			dgvStudy.DataSource = dvStudy;
+			dgvStudy.Columns[10].Visible = false;
 		}
 
 		protected void CreateNetwork()
@@ -291,19 +293,43 @@ namespace neurosim
 			this.filename = filename;
 			FileStream fs = File.Open(filename, FileMode.Open);
 			dtStudy = dtStudy.Deserialize(fs);			// awkward.
+			fs.Close();
+
+			// Updating for new columns:
+			if (!dtStudy.Columns.Contains("Location"))
+			{
+				dtStudy.Columns.Add("Location");
+			}
+
 			dvStudy = new DataView(dtStudy);
 			dgvStudy.DataSource = dvStudy;
 			UpdatePlotters(dtStudy);
 			UpdateConnections(dtStudy);
-			fs.Close();
+
+			// setup for adding next probe for color and neuron position.
+			probeColorIdx = dtStudy.Rows.Count;
+
+			// Refresh the network display.
+			pnlNetwork.Tick();
 		}
 
 		protected void SaveNetwork(string filename)
 		{
+			UpdateLocations();
 			this.filename = filename;
 			FileStream fs = File.Create(filename);
 			dtStudy.Serialize(fs);
 			fs.Close();
+		}
+
+		protected void UpdateLocations()
+		{
+			foreach (DataRow row in dtStudy.Rows)
+			{
+				Neuron n = rowNeuronMap[row];
+				NeuronPlot np = neuronPlots.Single(p => p.Neuron == n);
+				row["Location"] = np.Location;
+			}
 		}
 
 		private void btnPauseGo_Click(object sender, EventArgs e)
@@ -419,6 +445,7 @@ namespace neurosim
 			row["RPRR"] = cfg.RestingPotentialReturnRate.ToDisplayValue();
 			row["LKG"] = "0";
 			row["PCOLOR"] = probeColors[probeColorIdx];
+			row["Location"] = new Point(20 + probeColorIdx * 30, pnlNetwork.Height / 2);
 			dt.Rows.Add(row);
 			rowNeuronMap[row] = n;
 		}
@@ -467,6 +494,9 @@ namespace neurosim
 
 				case 9:					// connections
 					UpdateConnections(n, newVal);
+					break;
+
+				case 10:				// we don't support updating locations -- this should be a hidden column
 					break;
 			}
 		}
@@ -523,7 +553,15 @@ namespace neurosim
 				n.Leakage = row["LKG"].ToString().ToPotential();
 
 				pnlScope.AddProbe(n, probeColors[probeColorIdx]);
-				neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
+				NeuronPlot np = new NeuronPlot() { Neuron = n, Location = new Point(20 + probeColorIdx * 30, pnlNetwork.Height / 2) };
+
+				if (row["Location"] != DBNull.Value)
+				{
+					string pos = row["Location"].ToString();
+					np.Location = new Point(pos.Between('=', ',').to_i(), pos.RightOf(',').Between('=', '}').to_i());
+				}
+
+				neuronPlots.Add(np);
 				probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
 			}
 
