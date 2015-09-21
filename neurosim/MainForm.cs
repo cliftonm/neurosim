@@ -71,7 +71,9 @@ namespace neurosim
 
 		protected void OnShown(object sender, EventArgs e)
 		{
-			pnlNetwork.Chart = new NeuronChart();
+			NeuronChart neuronChart = new NeuronChart();
+			neuronChart.NeuronSelected += OnNeuronSelected;
+			pnlNetwork.Chart = neuronChart;
 
 			Initialize();
 			BindSliders();
@@ -539,6 +541,7 @@ namespace neurosim
 		{
 			rowNeuronMap.Clear();
 			neuronPlots.Clear();
+			pnlScope.ClearProbes();
 			probeColorIdx = 0;
 
 			foreach (DataRow row in dt.Rows)
@@ -567,6 +570,51 @@ namespace neurosim
 
 			pnlNetwork.SetPlots(neuronPlots);
 			pnlNetwork.Tick();
+		}
+
+		protected void OnNeuronSelected(object sender, SelectedNeuronEventArgs e)
+		{
+			DataRow row = rowNeuronMap.Single(kvp => kvp.Value == e.Neuron).Key;
+
+			// Find the row in the view.
+			int idx = 0;
+			int selectedRow = 0;
+
+			foreach (DataRowView drv in dvStudy)
+			{
+				// De-select all rows.
+				dgvStudy.Rows[idx].Selected = false;
+
+				if (drv.Row == row)
+				{
+					selectedRow = idx;
+				}
+
+				++idx;
+			}
+
+			// Select just the row associated with the neuron selected in the "chart."
+			dgvStudy.Rows[selectedRow].Selected = true;
+		}
+
+		private void pnlNetwork_MouseDown(object sender, MouseEventArgs e)
+		{
+
+		}
+
+		private void pnlNetwork_MouseLeave(object sender, EventArgs e)
+		{
+
+		}
+
+		private void pnlNetwork_MouseMove(object sender, MouseEventArgs e)
+		{
+
+		}
+
+		private void pnlNetwork_MouseUp(object sender, MouseEventArgs e)
+		{
+
 		}
 	}
 }

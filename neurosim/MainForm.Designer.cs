@@ -437,7 +437,7 @@
 			// btnRemoveNeuron
 			// 
 			this.btnRemoveNeuron.Location = new System.Drawing.Point(116, 7);
-			this.btnRemoveNeuron.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.btnRemoveNeuron.Margin = new System.Windows.Forms.Padding(4);
 			this.btnRemoveNeuron.Name = "btnRemoveNeuron";
 			this.btnRemoveNeuron.Size = new System.Drawing.Size(100, 28);
 			this.btnRemoveNeuron.TabIndex = 2;
@@ -448,7 +448,7 @@
 			// btnAddNeuron
 			// 
 			this.btnAddNeuron.Location = new System.Drawing.Point(8, 7);
-			this.btnAddNeuron.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.btnAddNeuron.Margin = new System.Windows.Forms.Padding(4);
 			this.btnAddNeuron.Name = "btnAddNeuron";
 			this.btnAddNeuron.Size = new System.Drawing.Size(100, 28);
 			this.btnAddNeuron.TabIndex = 1;
@@ -463,10 +463,10 @@
 			this.dgvStudy.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
 			this.dgvStudy.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.dgvStudy.Location = new System.Drawing.Point(8, 38);
-			this.dgvStudy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.dgvStudy.Margin = new System.Windows.Forms.Padding(4);
 			this.dgvStudy.Name = "dgvStudy";
 			this.dgvStudy.RowHeadersVisible = false;
-			this.dgvStudy.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+			this.dgvStudy.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dgvStudy.Size = new System.Drawing.Size(995, 245);
 			this.dgvStudy.TabIndex = 0;
 			this.dgvStudy.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvStudy_CellEndEdit);
@@ -514,7 +514,7 @@
 			this.Controls.Add(this.menuStrip1);
 			this.Controls.Add(this.btnCreate);
 			this.MainMenuStrip = this.menuStrip1;
-			this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.Margin = new System.Windows.Forms.Padding(4);
 			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "NeuroSim";

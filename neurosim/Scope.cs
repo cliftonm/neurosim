@@ -29,6 +29,11 @@ namespace neurosim
 			vOffset = (Height - 200) / 2;
 		}
 
+		public void ClearProbes()
+		{
+			probes.Clear();
+		}
+
 		public void AddProbe(Neuron n, Color color)
 		{
 			probes.Add(new Probe(n, Width, color, vOffset));

@@ -9,8 +9,15 @@ using Clifton.Extensions;
 
 namespace neurosim
 {
+	public class SelectedNeuronEventArgs : EventArgs
+	{
+		public Neuron Neuron { get; set; }
+	}
+
 	public class NeuronChart : NetworkChart
 	{
+		public event EventHandler<SelectedNeuronEventArgs> NeuronSelected;
+
 		protected Brush brushBlack;
 		protected Pen penBlack;
 		protected Pen penGreen;
@@ -58,6 +65,7 @@ namespace neurosim
 					 (np.Location.Y + 5 > pos.Y))
 				{
 					selectedNeuron = np;
+					NeuronSelected.Fire(this, new SelectedNeuronEventArgs() { Neuron = selectedNeuron.Neuron });
 					break;
 				}
 			}
@@ -88,6 +96,7 @@ namespace neurosim
 				else
 				{
 					gr.FillEllipse(brushCountDown[colorIdx], new Rectangle(np.Location.X - 5, np.Location.Y - 5, 10, 10));
+					gr.DrawEllipse(pen, new Rectangle(np.Location.X - 5, np.Location.Y - 5, 10, 10));
 				}
 
 				// If no connections, just draw a vertical "no connection" endpoint
