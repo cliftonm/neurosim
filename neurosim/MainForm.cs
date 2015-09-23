@@ -42,6 +42,7 @@ namespace neurosim
 		protected CountDownChart countdownChart;
 		protected StateChart stateChart;
 		protected Chart currentChart;
+		protected bool usingCountDownChart = true;
 
 		protected Color[] probeColors = new Color[] 
 		{
@@ -99,6 +100,8 @@ namespace neurosim
 
 		protected void Initialize()
 		{
+			usingCountDownChart = true;
+			pnlNetwork.Chart = countdownChart;
 			studyNeuronPlots = new List<NeuronPlot>();
 			networkNeuronPlots = new List<NeuronPlot>();
 			btnStep.Enabled = false;
@@ -128,7 +131,7 @@ namespace neurosim
 			else if (tcTabs.SelectedIndex == 2)
 			{
 				currentChart = Chart.NetworkChart;
-				pnlNetwork.Chart = countdownChart;
+				pnlNetwork.Chart = usingCountDownChart ? (NetworkChart)countdownChart : (NetworkChart)stateChart;
 				pnlNetwork.SetPlots(networkNeuronPlots);
 				pnlNetwork.Tick();
 			}
@@ -155,14 +158,15 @@ namespace neurosim
 
 		protected void CreateNetwork()
 		{
+			Cursor = Cursors.WaitCursor;
 			networkNeuronPlots = new List<NeuronPlot>();
 
 			int mx = pnlNetwork.Width / 4;
 			int my = pnlNetwork.Height / 4;
-			int c = 4;				// # of connections each neuron makes
-			int d = 2;				// max distance of each connection.			Must be multiple of 2
-			int r = 4;				// radius (as a square) of connections.		Must be multiple of 2
-			int p = 10;
+			int c = NetworkConfig.DefaultConfiguration.NumConnections;			// # of connections each neuron makes
+			int d = NetworkConfig.DefaultConfiguration.MaxDistance;				// max distance of each connection.			Must be multiple of 2
+			int r = NetworkConfig.DefaultConfiguration.Radius;					// radius (as a square) of connections.		Must be multiple of 2
+			int p = NetworkConfig.DefaultConfiguration.Pacemakers;				// # of pacemaker neurons
 
 			// Initialize an mx x my array of neurons.  The edges wrap top-bottom / left-right.
 			for (int x = 0; x < mx; x++)
@@ -219,7 +223,8 @@ namespace neurosim
 					// Pick the first connecting neuron for a second trace.
 					pnlScope.AddProbe(n.Connections[0].Neuron, Color.Red);
 				}
-*/ 
+*/
+				Cursor = Cursors.Arrow;
 			}
 
 
@@ -410,6 +415,11 @@ namespace neurosim
 			Bind(tbRp, lblRpValue, NeuronConfig.DefaultConfiguration, "RestingPotential");
 			Bind(tbRprr, lblRprrValue, NeuronConfig.DefaultConfiguration, "RestingPotentialReturnRate");
 			Bind(tbRrr, lblRrrValue, NeuronConfig.DefaultConfiguration, "RefractoryRecoveryRate");
+
+			Bind(tbNumberOfConnections, lblNumberOfConnections, NetworkConfig.DefaultConfiguration, "NumConnections");
+			Bind(tbMaxDistance, lblMaxDistance, NetworkConfig.DefaultConfiguration, "MaxDistance");
+			Bind(tbConnectionRadius, lblConnectionRadius, NetworkConfig.DefaultConfiguration, "Radius");
+			Bind(tbNumPacemakers, lblNumPacemakers, NetworkConfig.DefaultConfiguration, "Pacemakers");
 		}
 
 		/// <summary>
@@ -445,6 +455,21 @@ namespace neurosim
 					p = ConvertTrackBar(v);
 					pi.SetValue(config, p);					
 				};
+		}
+
+		protected void Bind(TrackBar tb, Label lbl, NetworkConfig config, string field)
+		{
+			Type t = config.GetType();
+			PropertyInfo pi = t.GetProperty(field, BindingFlags.Instance | BindingFlags.Public);
+			int p = (int)pi.GetValue(config);
+			tb.Value = p;
+			lbl.Text = p.ToString();
+			tb.ValueChanged += (sender, args) =>
+			{
+				p = tb.Value;
+				lbl.Text = p.ToString();
+				pi.SetValue(config, p);
+			};
 		}
 
 		/// <summary>
@@ -636,24 +661,16 @@ namespace neurosim
 			dgvStudy.Rows[selectedRow].Selected = true;
 		}
 
-		private void pnlNetwork_MouseDown(object sender, MouseEventArgs e)
+		private void rbActionPotentialDecay_CheckedChanged(object sender, EventArgs e)
 		{
-
+			pnlNetwork.Chart = countdownChart;
+			usingCountDownChart = true;
 		}
 
-		private void pnlNetwork_MouseLeave(object sender, EventArgs e)
+		private void rbMembranePotential_CheckedChanged(object sender, EventArgs e)
 		{
-
-		}
-
-		private void pnlNetwork_MouseMove(object sender, MouseEventArgs e)
-		{
-
-		}
-
-		private void pnlNetwork_MouseUp(object sender, MouseEventArgs e)
-		{
-
+			pnlNetwork.Chart = stateChart;
+			usingCountDownChart = false;
 		}
 	}
 }
