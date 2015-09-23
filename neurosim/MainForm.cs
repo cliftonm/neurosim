@@ -19,7 +19,14 @@ namespace neurosim
 	{
 		public const int REFRESH_RATE = 30;
 
-		protected List<NeuronPlot> neuronPlots;
+		public enum Chart
+		{
+			StudyChart,
+			NetworkChart
+		}
+
+		protected List<NeuronPlot> studyNeuronPlots;
+		protected List<NeuronPlot> networkNeuronPlots;
 		protected Neuron pacemakerNeuron;
 		protected Neuron receiverNeuron;
 		protected Timer timer;
@@ -30,6 +37,11 @@ namespace neurosim
 		protected DataTable dtStudy;
 		protected DataView dvStudy;
 		protected Dictionary<DataRow, Neuron> rowNeuronMap = new Dictionary<DataRow, Neuron>();
+
+		protected NeuronChart neuronChart;
+		protected CountDownChart countdownChart;
+		protected StateChart stateChart;
+		protected Chart currentChart;
 
 		protected Color[] probeColors = new Color[] 
 		{
@@ -53,8 +65,9 @@ namespace neurosim
 		public void Tick()
 		{
 			bool networkFired = false;
-			// scopedNeuron.TestPattern();
-			foreach (NeuronPlot np in neuronPlots)
+			List<NeuronPlot> plots = currentChart == Chart.StudyChart ? studyNeuronPlots : networkNeuronPlots;
+
+			foreach (NeuronPlot np in plots)
 			{
 				np.Neuron.Tick();
 				networkFired |= np.Neuron.Fired;
@@ -71,9 +84,11 @@ namespace neurosim
 
 		protected void OnShown(object sender, EventArgs e)
 		{
-			NeuronChart neuronChart = new NeuronChart();
+			currentChart = Chart.StudyChart;
+			neuronChart = new NeuronChart();
 			neuronChart.NeuronSelected += OnNeuronSelected;
-			pnlNetwork.Chart = neuronChart;
+			stateChart = new StateChart();
+			countdownChart = new CountDownChart();
 
 			Initialize();
 			BindSliders();
@@ -84,17 +99,39 @@ namespace neurosim
 
 		protected void Initialize()
 		{
-			neuronPlots = new List<NeuronPlot>();
+			studyNeuronPlots = new List<NeuronPlot>();
+			networkNeuronPlots = new List<NeuronPlot>();
 			btnStep.Enabled = false;
 
-			rnd = new Random(2);						// always use the same seed so we can generate the same dataset.
+			rnd = new Random(31415);						// always use the same seed so we can generate the same dataset.
 
 			timer = new Timer();
 			timer.Interval = REFRESH_RATE;
 			timer.Tick += OnTick;
 			Pause();
 
-			tcTabs.SelectTab(1);
+			// Tab page click events don't fire when the tab page is selected.  Sigh.
+			tcTabs.SelectedIndexChanged += OnSelectedIndexChanged;
+
+			// tcTabs.SelectTab(1);
+		}
+
+		protected void OnSelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (tcTabs.SelectedIndex == 1)
+			{
+				currentChart = Chart.StudyChart;
+				pnlNetwork.Chart = neuronChart;
+				pnlNetwork.SetPlots(studyNeuronPlots);
+				pnlNetwork.Tick();
+			}
+			else if (tcTabs.SelectedIndex == 2)
+			{
+				currentChart = Chart.NetworkChart;
+				pnlNetwork.Chart = countdownChart;
+				pnlNetwork.SetPlots(networkNeuronPlots);
+				pnlNetwork.Tick();
+			}
 		}
 
 		protected void InitializeStudyView()
@@ -118,7 +155,7 @@ namespace neurosim
 
 		protected void CreateNetwork()
 		{
-			neuronPlots = new List<NeuronPlot>();
+			networkNeuronPlots = new List<NeuronPlot>();
 
 			int mx = pnlNetwork.Width / 4;
 			int my = pnlNetwork.Height / 4;
@@ -133,12 +170,12 @@ namespace neurosim
 				for (int y = 0; y < my; y++)
 				{
 					Neuron n = new Neuron();
-					neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(x * 4, y * 4) });
+					networkNeuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(x * 4, y * 4) });
 				}
 			}
 
 			// Each neuron connects to c other neurons in a localized r x r region at a maximum distance of d from the originating neuron.
-			foreach (NeuronPlot np in neuronPlots)
+			foreach (NeuronPlot np in networkNeuronPlots)
 			{
 				int x = np.Location.X / 4;
 				int y = np.Location.Y / 4;
@@ -163,7 +200,7 @@ namespace neurosim
 					int qy = adjy % my;
 
 					// Find the neuron at this location
-					NeuronPlot npTarget = neuronPlots.Single(np2 => np2.Location.X == qx * 4 & np2.Location.Y == qy * 4);
+					NeuronPlot npTarget = networkNeuronPlots.Single(np2 => np2.Location.X == qx * 4 & np2.Location.Y == qy * 4);
 					np.Neuron.AddConnection(new Connection(npTarget.Neuron));
 				}
 			}
@@ -171,20 +208,22 @@ namespace neurosim
 			// Pick p neurons to be pacemakers at different rates.
 			for (int i = 0; i < p; i++)
 			{
-				Neuron n = neuronPlots[rnd.Next(mx * my)].Neuron;
+				Neuron n = networkNeuronPlots[rnd.Next(mx * my)].Neuron;
 				// You get more interesting patterns when the leakage is randomized so that pacemaker neurons do not all
 				// fire synchronously.
 				n.Leakage = 256 + rnd.Next(256);			
-				
+/*				
 				if (i == 0)
 				{
 					pnlScope.AddProbe(n, Color.LightBlue);
 					// Pick the first connecting neuron for a second trace.
 					pnlScope.AddProbe(n.Connections[0].Neuron, Color.Red);
 				}
+*/ 
 			}
 
-			pnlNetwork.SetPlots(neuronPlots);
+
+			pnlNetwork.SetPlots(networkNeuronPlots);
 
 			/*
 			pacemakerNeuron = new Neuron();
@@ -259,8 +298,8 @@ namespace neurosim
 
 		protected void Clear()
 		{
-			neuronPlots.Clear();
-			pnlNetwork.SetPlots(neuronPlots);
+			networkNeuronPlots.Clear();
+			pnlNetwork.SetPlots(networkNeuronPlots);
 			filename = String.Empty;
 		}
 
@@ -305,7 +344,7 @@ namespace neurosim
 
 			dvStudy = new DataView(dtStudy);
 			dgvStudy.DataSource = dvStudy;
-			UpdatePlotters(dtStudy);
+			UpdateStudyPlot(dtStudy);
 			UpdateConnections(dtStudy);
 
 			// setup for adding next probe for color and neuron position.
@@ -329,7 +368,7 @@ namespace neurosim
 			foreach (DataRow row in dtStudy.Rows)
 			{
 				Neuron n = rowNeuronMap[row];
-				NeuronPlot np = neuronPlots.Single(p => p.Neuron == n);
+				NeuronPlot np = studyNeuronPlots.Single(p => p.Neuron == n);
 				row["Location"] = np.Location;
 			}
 		}
@@ -416,9 +455,9 @@ namespace neurosim
 			Neuron n = new Neuron();
 			AddNeuron(n, dtStudy, NeuronConfig.DefaultConfiguration);
 			pnlScope.AddProbe(n, probeColors[probeColorIdx]);
-			neuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
+			studyNeuronPlots.Add(new NeuronPlot() { Neuron = n, Location = new Point(20 + probeColorIdx * 30, pnlNetwork.Height / 2) });
 			probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
-			pnlNetwork.SetPlots(neuronPlots);
+			pnlNetwork.SetPlots(studyNeuronPlots);
 			pnlNetwork.Tick();
 		}
 
@@ -537,10 +576,10 @@ namespace neurosim
 			}
 		}
 
-		protected void UpdatePlotters(DataTable dt)
+		protected void UpdateStudyPlot(DataTable dt)
 		{
 			rowNeuronMap.Clear();
-			neuronPlots.Clear();
+			studyNeuronPlots.Clear();
 			pnlScope.ClearProbes();
 			probeColorIdx = 0;
 
@@ -564,11 +603,11 @@ namespace neurosim
 					np.Location = new Point(pos.Between('=', ',').to_i(), pos.RightOf(',').Between('=', '}').to_i());
 				}
 
-				neuronPlots.Add(np);
+				studyNeuronPlots.Add(np);
 				probeColorIdx = (probeColorIdx + 1) % probeColors.Length;
 			}
 
-			pnlNetwork.SetPlots(neuronPlots);
+			pnlNetwork.SetPlots(studyNeuronPlots);
 			pnlNetwork.Tick();
 		}
 

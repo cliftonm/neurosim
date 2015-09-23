@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			neurosim.CountDownChart countDownChart1 = new neurosim.CountDownChart();
+			neurosim.CountDownChart countDownChart2 = new neurosim.CountDownChart();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -43,7 +43,7 @@
 			this.btnPauseGo = new System.Windows.Forms.Button();
 			this.btnStep = new System.Windows.Forms.Button();
 			this.tcTabs = new System.Windows.Forms.TabControl();
-			this.tabPage1 = new System.Windows.Forms.TabPage();
+			this.tpNeuron = new System.Windows.Forms.TabPage();
 			this.lblRprrValue = new System.Windows.Forms.Label();
 			this.label13 = new System.Windows.Forms.Label();
 			this.tbRprr = new System.Windows.Forms.TrackBar();
@@ -62,23 +62,24 @@
 			this.lblRpValue = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
 			this.tbRp = new System.Windows.Forms.TrackBar();
-			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.tpStudy = new System.Windows.Forms.TabPage();
 			this.btnRemoveNeuron = new System.Windows.Forms.Button();
 			this.btnAddNeuron = new System.Windows.Forms.Button();
 			this.dgvStudy = new System.Windows.Forms.DataGridView();
 			this.btnCreate = new System.Windows.Forms.Button();
 			this.pnlNetwork = new neurosim.Network();
 			this.pnlScope = new neurosim.Scope();
+			this.tpNetwork = new System.Windows.Forms.TabPage();
 			this.menuStrip1.SuspendLayout();
 			this.tcTabs.SuspendLayout();
-			this.tabPage1.SuspendLayout();
+			this.tpNeuron.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.tbRprr)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbHpOvershoot)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRrr)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbApValue)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbApThreshold)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRp)).BeginInit();
-			this.tabPage2.SuspendLayout();
+			this.tpStudy.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dgvStudy)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -196,8 +197,9 @@
 			// 
 			// tcTabs
 			// 
-			this.tcTabs.Controls.Add(this.tabPage1);
-			this.tcTabs.Controls.Add(this.tabPage2);
+			this.tcTabs.Controls.Add(this.tpNeuron);
+			this.tcTabs.Controls.Add(this.tpStudy);
+			this.tcTabs.Controls.Add(this.tpNetwork);
 			this.tcTabs.Location = new System.Drawing.Point(16, 366);
 			this.tcTabs.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
 			this.tcTabs.Name = "tcTabs";
@@ -205,34 +207,34 @@
 			this.tcTabs.Size = new System.Drawing.Size(1020, 321);
 			this.tcTabs.TabIndex = 7;
 			// 
-			// tabPage1
+			// tpNeuron
 			// 
-			this.tabPage1.Controls.Add(this.lblRprrValue);
-			this.tabPage1.Controls.Add(this.label13);
-			this.tabPage1.Controls.Add(this.tbRprr);
-			this.tabPage1.Controls.Add(this.lblHpOvershootValue);
-			this.tabPage1.Controls.Add(this.label9);
-			this.tabPage1.Controls.Add(this.tbHpOvershoot);
-			this.tabPage1.Controls.Add(this.lblRrrValue);
-			this.tabPage1.Controls.Add(this.label11);
-			this.tabPage1.Controls.Add(this.tbRrr);
-			this.tabPage1.Controls.Add(this.lblApValueValue);
-			this.tabPage1.Controls.Add(this.label7);
-			this.tabPage1.Controls.Add(this.tbApValue);
-			this.tabPage1.Controls.Add(this.lblApThresholdValue);
-			this.tabPage1.Controls.Add(this.label5);
-			this.tabPage1.Controls.Add(this.tbApThreshold);
-			this.tabPage1.Controls.Add(this.lblRpValue);
-			this.tabPage1.Controls.Add(this.label3);
-			this.tabPage1.Controls.Add(this.tbRp);
-			this.tabPage1.Location = new System.Drawing.Point(4, 25);
-			this.tabPage1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-			this.tabPage1.Name = "tabPage1";
-			this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-			this.tabPage1.Size = new System.Drawing.Size(1012, 292);
-			this.tabPage1.TabIndex = 0;
-			this.tabPage1.Text = "Neuron";
-			this.tabPage1.UseVisualStyleBackColor = true;
+			this.tpNeuron.Controls.Add(this.lblRprrValue);
+			this.tpNeuron.Controls.Add(this.label13);
+			this.tpNeuron.Controls.Add(this.tbRprr);
+			this.tpNeuron.Controls.Add(this.lblHpOvershootValue);
+			this.tpNeuron.Controls.Add(this.label9);
+			this.tpNeuron.Controls.Add(this.tbHpOvershoot);
+			this.tpNeuron.Controls.Add(this.lblRrrValue);
+			this.tpNeuron.Controls.Add(this.label11);
+			this.tpNeuron.Controls.Add(this.tbRrr);
+			this.tpNeuron.Controls.Add(this.lblApValueValue);
+			this.tpNeuron.Controls.Add(this.label7);
+			this.tpNeuron.Controls.Add(this.tbApValue);
+			this.tpNeuron.Controls.Add(this.lblApThresholdValue);
+			this.tpNeuron.Controls.Add(this.label5);
+			this.tpNeuron.Controls.Add(this.tbApThreshold);
+			this.tpNeuron.Controls.Add(this.lblRpValue);
+			this.tpNeuron.Controls.Add(this.label3);
+			this.tpNeuron.Controls.Add(this.tbRp);
+			this.tpNeuron.Location = new System.Drawing.Point(4, 25);
+			this.tpNeuron.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.tpNeuron.Name = "tpNeuron";
+			this.tpNeuron.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.tpNeuron.Size = new System.Drawing.Size(1012, 292);
+			this.tpNeuron.TabIndex = 0;
+			this.tpNeuron.Text = "Neuron";
+			this.tpNeuron.UseVisualStyleBackColor = true;
 			// 
 			// lblRprrValue
 			// 
@@ -420,19 +422,19 @@
 			this.tbRp.TickFrequency = 200;
 			this.tbRp.TickStyle = System.Windows.Forms.TickStyle.Both;
 			// 
-			// tabPage2
+			// tpStudy
 			// 
-			this.tabPage2.Controls.Add(this.btnRemoveNeuron);
-			this.tabPage2.Controls.Add(this.btnAddNeuron);
-			this.tabPage2.Controls.Add(this.dgvStudy);
-			this.tabPage2.Location = new System.Drawing.Point(4, 25);
-			this.tabPage2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-			this.tabPage2.Name = "tabPage2";
-			this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-			this.tabPage2.Size = new System.Drawing.Size(1012, 292);
-			this.tabPage2.TabIndex = 1;
-			this.tabPage2.Text = "Study";
-			this.tabPage2.UseVisualStyleBackColor = true;
+			this.tpStudy.Controls.Add(this.btnRemoveNeuron);
+			this.tpStudy.Controls.Add(this.btnAddNeuron);
+			this.tpStudy.Controls.Add(this.dgvStudy);
+			this.tpStudy.Location = new System.Drawing.Point(4, 25);
+			this.tpStudy.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.tpStudy.Name = "tpStudy";
+			this.tpStudy.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+			this.tpStudy.Size = new System.Drawing.Size(1012, 292);
+			this.tpStudy.TabIndex = 1;
+			this.tpStudy.Text = "Study";
+			this.tpStudy.UseVisualStyleBackColor = true;
 			// 
 			// btnRemoveNeuron
 			// 
@@ -484,7 +486,7 @@
 			// 
 			// pnlNetwork
 			// 
-			this.pnlNetwork.Chart = countDownChart1;
+			this.pnlNetwork.Chart = countDownChart2;
 			this.pnlNetwork.Location = new System.Drawing.Point(16, 62);
 			this.pnlNetwork.Margin = new System.Windows.Forms.Padding(4);
 			this.pnlNetwork.Name = "pnlNetwork";
@@ -498,6 +500,15 @@
 			this.pnlScope.Name = "pnlScope";
 			this.pnlScope.Size = new System.Drawing.Size(400, 295);
 			this.pnlScope.TabIndex = 1;
+			// 
+			// tpNetwork
+			// 
+			this.tpNetwork.Location = new System.Drawing.Point(4, 25);
+			this.tpNetwork.Name = "tpNetwork";
+			this.tpNetwork.Size = new System.Drawing.Size(1012, 292);
+			this.tpNetwork.TabIndex = 2;
+			this.tpNetwork.Text = "Network";
+			this.tpNetwork.UseVisualStyleBackColor = true;
 			// 
 			// MainForm
 			// 
@@ -521,15 +532,15 @@
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
 			this.tcTabs.ResumeLayout(false);
-			this.tabPage1.ResumeLayout(false);
-			this.tabPage1.PerformLayout();
+			this.tpNeuron.ResumeLayout(false);
+			this.tpNeuron.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.tbRprr)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbHpOvershoot)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRrr)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbApValue)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbApThreshold)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRp)).EndInit();
-			this.tabPage2.ResumeLayout(false);
+			this.tpStudy.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.dgvStudy)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
@@ -554,9 +565,9 @@
 		private System.Windows.Forms.Button btnPauseGo;
 		private System.Windows.Forms.Button btnStep;
 		private System.Windows.Forms.TabControl tcTabs;
-		private System.Windows.Forms.TabPage tabPage1;
+		private System.Windows.Forms.TabPage tpNeuron;
 		private System.Windows.Forms.Button btnCreate;
-		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.TabPage tpStudy;
 		private System.Windows.Forms.Label lblRprrValue;
 		private System.Windows.Forms.TrackBar tbRprr;
 		private System.Windows.Forms.Label lblHpOvershootValue;
@@ -578,6 +589,7 @@
 		private System.Windows.Forms.DataGridView dgvStudy;
 		private System.Windows.Forms.Button btnRemoveNeuron;
 		private System.Windows.Forms.Button btnAddNeuron;
+		private System.Windows.Forms.TabPage tpNetwork;
 	}
 }
 
