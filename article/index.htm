@@ -10,13 +10,393 @@
 
 <p>Neuro-Sim</p>
 <p>A simulation of biological neurons</p>
+<p align="center">In theory there is no difference between theory and practice. 
+In practice there is.<br>
+&nbsp; -- Yogi Berra<br>
+&nbsp;</p>
 <h2>Introduction</h2>
 <p>In this article I am presenting a neuron simulator and study tool.&nbsp; 
 Typically, neuron simulation is either highly idealized, consisting of an input 
 layer, one or more hidden layers, and an output layers.&nbsp; Signals propagate 
 through the network based on weighting and summation thresholds.&nbsp; This 
 diagram is a basic example:</p>
-<p>&nbsp;</p>
+<p align="center"><img border="0" src="a10fig01.jpg" width="370" height="212"></p>
+<p align="center">(from
+<a href="http://www.scielo.br/scielo.php?pid=S0100-06832013000100010&script=sci_arttext">
+http://www.scielo.br/scielo.php?pid=S0100-06832013000100010&amp;script=sci_arttext</a>)
+</p>
+<p align="left">Conversely, other neuron simulators will be very low level, 
+simulating the sodium, potassium, and calcium channels.&nbsp; You can read more 
+about that, but here's a start:&nbsp;
+<a href="http://www.ncbi.nlm.nih.gov/books/NBK26910/">
+http://www.ncbi.nlm.nih.gov/books/NBK26910/</a> </p>
+<p align="left">What this article presents is a middle ground, where the 
+electrical characteristics of input stimulus (either excitatory or inhibitory) 
+affects the action potential.&nbsp; Also, neuron characteristics such as its 
+refractory period (the time it takes to recover from an action potential) are 
+simulated.&nbsp; An approximate plot of a typical action potential looks like 
+this:</p>
+<p align="center">
+<img border="0" src="300px-Action_potential.svg.png" width="371" height="361"></p>
+<p align="center">(from <a href="https://en.wikipedia.org/wiki/Action_potential">
+https://en.wikipedia.org/wiki/Action_potential</a>) </p>
+<p align="left">In the software presented here, a typical plot looks like this 
+(it's not nearly as nicely curvy):</p>
+<p align="center"><img border="0" src="ap1.png" width="397" height="294"></p>
+<p align="center">Idealized Action Potential in Neuro-Sim of a &quot;pacemaker&quot; 
+Neuron</p>
+<p align="left">Neuro-Sim let's you play around with specific neural 
+configurations:</p>
+<p align="center"><img border="0" src="reflex1.png" width="208" height="196"></p>
+<p align="center">Simulating a reflex action</p>
+<p align="left">as well as playing around with full networks, which can be quite 
+mesmerizing to watch:</p>
+<p align="center"><img border="0" src="network1.png" width="463" height="295"></p>
+<p align="center">Snapshot of a neural network in action</p>
+<p align="left">The reason for the excellent Yogi Berra quote at the beginning 
+of this article is that, while there is much we know about neurons, there are 
+also a lot of theories out there (and quite frankly, unknowns) as to how a 
+cluster of neurons results in consciousness, the ability to think, and so forth.&nbsp; 
+Also, keep in mind that most studies of neurons are invasive, requiring probes 
+to measure membrane potential and/or electrically stimulate neurons.&nbsp; The 
+practice of actually implementing is neural network capable of, well, thinking, 
+is still, as far as I'm concerned, in the realm of theory.</p>
+<h3 align="left">History</h3>
+<p align="left">I originally wrote a very similar simulator back (in C++) in the 
+days of the 80286 processor (30 years ago, oh wow), running at 8 Mhz, and it was 
+significant improvement to add in an 80287 math co-processor!&nbsp; At that 
+time, I was only able to simulate a 20x20 grid of neurons, and at that, it 
+chunked along.&nbsp; The simulator presented here easily handles over 8000 
+neurons, and that's running on a single thread, including UI updates, on my 
+2.3Ghz i7 laptop.&nbsp; So, this has been one of those back-burner projects I've 
+been wanting to resurrect for years and I'm happy to have finally gotten around 
+to it.</p>
+<h3 align="left">What is not Simulated</h3>
+<p align="left">A variety of qualities of a neuron are not simulated.&nbsp; If 
+the terms used here are unfamiliar, read the next section &quot;Neurons: A Crash 
+Course&quot;.&nbsp; Most notably, Neuro-Sim does not account for:</p>
+<ul>
+	<li>
+	<p align="left">Propagation time along the axon.</li>
+	<li>
+	<p align="left">Myelinated vs. un-myelinated axons (affects propagation time).</li>
+	<li>
+	<p align="left">Location of receptor on the dendrite or soma (affects how 
+	the localized membrane potential change affects the axon hillock).</li>
+	<li>
+	<p align="left">Relative refractory period (currently, the entire refractory 
+	period is absolute -- the neuron cannot fire again).</li>
+	<li>
+	<p align="left">Pre-synaptic facilitation or inhibition -- rather than 
+	connecting directly to the dendrite or cell body, some synapses will connect 
+	to the pre-synaptic node of the pre-synaptic neuron, facilitating or 
+	inhibiting a specific synapse.</li>
+	<li>
+	<p align="left">There is no specific time basis -- the program implements a 
+	measureless &quot;tick&quot; in which all summations occur, followed by any action 
+	potential &quot;firing.&quot;&nbsp; The recovery rates are based on changes per &quot;tick&quot; 
+	with no regard to what unit of time a &quot;tick&quot; actually is.</li>
+</ul>
+<p align="left">Given these limitations, very interesting networks and studies 
+can still be created.</p>
+<h3 align="left">Learning</h3>
+<p align="left">This simulator does not implement any &quot;learning&quot; algorithms.&nbsp; 
+The concept of neural network learning, from a biological perspective, is very 
+complicated and poorly understood, and includes such concepts as:</p>
+<ul>
+	<li>
+	<p align="left">synaptogenesis - the formation of synapses between neurons.&nbsp; 
+	This occurs through life but is most predominant in early brain development 
+	and also involves &quot;synaptic pruning&quot; -- eliminating synapses, which normally 
+	occurs between birth and puberty.</li>
+	<li>
+	<p align="left">neurogenesis - the creation of neurons from neural stem 
+	cells or progenitor cells.&nbsp; Again, this is most active in pre-natal 
+	development but there's some evidence that it occurs in adults as part of 
+	learning and memory.</li>
+	<li>
+	<p align="left">Hebbian theory<sup>2</sup> (neuro-plasticity) - the 
+	effectiveness of a synapse can be increased or decreased depending on the 
+	temporal correlation of the action potential between the pre-synaptic and 
+	post-synaptic neuron.&nbsp; Meaning, if the pre-synaptic neuron fires and 
+	the post-synaptic also fires within a specific time span, then the synapse 
+	is strengthened.&nbsp; If the pre-synaptic neuron fires but the 
+	post-synaptic neuron does not (or the post-synaptic neuron fires while a 
+	pre-synaptic neuron doesn't) then the synapse strength is decreased.</li>
+	<li>
+	<p align="left">changes in myelination -- some theories / studies indicate 
+	that learning also involves improving a neuron's efficacy through 
+	myelination, even in adults (sorry, no reference.)</li>
+</ul>
+<p align="left">There are other theories and studies as well, but these are the 
+predominant ones.&nbsp; None of them adequately explain what &quot;learning&quot; is, and 
+how the associated role of &quot;memory&quot; works, but they are interesting first-order 
+concepts to play with.&nbsp; Perhaps a future implementation will address these 
+ideas.</p>
+<h2 align="left">Neurons: A Crash Course</h2>
+<p align="left">There's a few terms that one needs to know about with regards to 
+neurons.&nbsp; This section is a crash course in neurons, and is by no means 
+complete.&nbsp; I'm going to heavily reference wikipedia for various definitions 
+here (yes, I've made a donation to them.)&nbsp; While I reference Wikipedia a 
+lot here, the basis for Neuro-Sim comes from the book
+<a href="http://www.amazon.com/Principles-Neural-Science-Eric-Kandel/dp/0838577016">
+Principles of Neuroscience</a>, now in its fifth edition (the book I'm using is 
+the second edition!)&nbsp; This book is so seminal it has its
+<a href="http://www.principlesofneuralscience.com/">own webpage</a>.</p>
+<h3 align="left">Neuron</h3>
+<p align="left">&quot;A neuron (/&#712;nj&#650;&#601;r&#594;n/ nyewr-on or /&#712;n&#650;&#601;r&#594;n/ newr-on; also known 
+as a neurone or nerve cell) is an electrically excitable cell that processes and 
+transmits information through electrical and chemical signals. These signals 
+between neurons occur via synapses, specialized connections with other cells. 
+Neurons can connect to each other to form neural networks. Neurons are the core 
+components of the brain and spinal cord of the central nervous system (CNS), and 
+of the ganglia of the peripheral nervous system (PNS). Specialized types of 
+neurons include: sensory neurons which respond to touch, sound, light and all 
+other stimuli affecting the cells of the sensory organs that then send signals 
+to the spinal cord and brain, motor neurons that receive signals from the brain 
+and spinal cord to cause muscle contractions and affect glandular outputs, and 
+interneurons which connect neurons to other neurons within the same region of 
+the brain, or spinal cord in neural networks.<br>
+A typical neuron consists of a cell body (soma), dendrites, and an axon.&quot;<sup>1</sup></p>
+<p align="left"><img border="0" src="note.png" width="24" height="32"> It's not 
+entirely accurate to say a neuron is electrically excitable because the actual 
+communication between neurons is usually chemical -- <i>neurotransmitters</i> are released in the <i>pre-synaptic cleft</i> of an 
+excited neuron and are received at the <i>post-synaptic cleft</i> of a receiving 
+neuron, which affects the local membrane potential of the receiving neuron.&nbsp; 
+There are also many kinds of neurons, each with different behaviors, including 
+neurons that do connect electrically rather than chemically.</p>
+<h3 align="left">Dendrite</h3>
+<p align="left">&quot;Dendrites (from Greek &#948;&#941;&#957;&#948;&#961;&#959;&#957; déndron, &quot;tree&quot;) (also dendron) 
+are the branched projections of a neuron that act to propagate the 
+electrochemical stimulation received from other neural cells to the cell body, 
+or soma, of the neuron from which the dendrites project. Electrical stimulation 
+is transmitted onto dendrites by upstream neurons (usually their axons) via 
+synapses which are located at various points throughout the dendritic tree. 
+Dendrites play a critical role in integrating these synaptic inputs and in 
+determining the extent to which action potentials are produced by the neuron.&quot;<sup>3</sup></p>
+<p align="left"><img border="0" src="note.png" width="24" height="32"> A 
+synaptic connection at a dendrite usually results in a local membrane potential 
+change, either excitatory or inhibitory.&nbsp; This change propagates to the 
+axon hillock (see below) for summation.&nbsp; Depending on the distance, the 
+actual potential change at the axon hillock will be less than that at the 
+location of the synapse.&nbsp; This affect is not simulated in Neuro-Sim.</p>
+<h3 align="left">Axon</h3>
+<p align="left">&quot;An axon (from Greek &#7940;&#958;&#969;&#957; áx&#333;n, axis), also known as a nerve 
+fibre, is a long, slender projection of a nerve cell, or neuron, that typically 
+conducts electrical impulses away from the neuron's cell body. The function of 
+the axon is to transmit information to different neurons, muscles and 
+glands...Axons make contact with other cells—usually other neurons but sometimes 
+muscle or gland cells—at junctions called synapses. At a synapse, the membrane 
+of the axon closely adjoins the membrane of the target cell, and special 
+molecular structures serve to transmit electrical or electrochemical signals 
+across the gap...A single axon, with all its branches taken together, can 
+innervate multiple parts of the brain and generate thousands of synaptic 
+terminals.&quot;<sup>4</sup></p>
+<p align="left"><img border="0" src="note.png" width="24" height="32">&nbsp; 
+Some of the more bizarre behaviors of neurons, such as not having an axon where 
+signals transmitting to dendrites, or axons ending in synapses on other axons, 
+are two of many exceptions that are not simulated in Neuro-Sim.</p>
+<h3 align="left">Axon Hillock</h3>
+<p align="left">&quot;The axon hillock is the last site in the soma where membrane 
+potentials propagated from synaptic inputs are summated before being transmitted 
+to the axon...Both inhibitory postsynaptic potentials (IPSPs) and excitatory 
+postsynaptic potentials (EPSPs) are summed in the axon hillock and once a 
+triggering threshold is exceeded, an action potential propagates through the 
+rest of the axon (and &quot;backwards&quot; towards the dendrites as seen in neural 
+backpropagation). The triggering is due to positive feedback between highly 
+crowded voltage-gated sodium channels, which are present at the critical density 
+at the axon hillock (and nodes of ranvier) but not in the soma.<br>
+<br>
+In its resting state, a neuron is polarized, with its inside at about -70 mV 
+relative to its surroundings. When an excitatory neurotransmitter is released by 
+the presynaptic neuron and binds to the postsynaptic dendritic spines, ligand-gated 
+ion channels open, allowing sodium ions to enter the cell. This may make the 
+postsynaptic membrane depolarized (less negative). This depolarization will 
+travel towards the axon hillock, diminishing exponentially with time and 
+distance. If several such events occur in a short time, the axon hillock may 
+become sufficiently depolarized for the voltage-gated sodium channels to open. 
+This initiates an action potential that then propagates down the axon.&quot;<sup>5</sup></p>
+<p align="left">In other words, while of course more complicated, the axon 
+hillock is where localized changes in membrane potential (usually from synapses 
+along the dendrite but also on the cell body itself) are summed.&nbsp; If the 
+membrane potential at the axon hillock (or at the first unmyelinated segment of 
+the axon) exceeds a specific threshold, an action potential occurs -- the neuron 
+fires.</p>
+<h3 align="left">Synapse</h3>
+<p align="left">&quot;In the nervous system, a synapse[1] is a structure that permits 
+a neuron (or nerve cell) to pass an electrical or chemical signal to another 
+neuron...Synapses are essential to neuronal function: neurons are cells that are 
+specialized to pass signals to individual target cells, and synapses are the 
+means by which they do so. At a synapse, the plasma membrane of the 
+signal-passing neuron (the presynaptic neuron) comes into close apposition with 
+the membrane of the target (postsynaptic) cell. Both the presynaptic and 
+postsynaptic sites contain extensive arrays of molecular machinery that link the 
+two membranes together and carry out the signaling process. In many synapses, 
+the presynaptic part is located on an axon, but some postsynaptic sites are 
+located on a dendrite or soma.&quot;<sup>6</sup></p>
+<p align="left">The modeling of a synapse is actually quite complex.&nbsp; The 
+spatial location of a synapse is important as the depolarization that occurs 
+locally on post-synaptic neuron diminishes over time and distance as it travels 
+toward the axon hillock (this is not modeled by Neuro-Sim.)&nbsp; In addition, 
+depending on the neurotransmitter and the type of synapse, the neurotransmitter 
+might not be &quot;cleaned up&quot; right away, allowing for continuous depolarization 
+(also not modeled by Neuro-Sim.)&nbsp; As mentioned earlier, pre-synaptic 
+facilitation and inhibition, affecting the pre-synaptic cleft, not the 
+post-synaptic neuron, is possible also (again not modeled by Neuro-Sim.)&nbsp; 
+These are just a few of the interesting characteristics of synapses.</p>
+<h3 align="left">Refractory Period</h3>
+<p align="left">&quot;The refractory periods are due to the inactivation property of 
+voltage-gated sodium channels and the lag of potassium channels in closing. 
+Voltage-gated sodium channels have two gating mechanisms, the activation 
+mechanism that opens the channel with depolarization and the inactivation 
+mechanism that closes the channel with repolarization. While the channel is in 
+the inactive state, it will not open in response to depolarization. The period 
+when the majority of sodium channels remain in the inactive state is the 
+absolute refractory period. After this period, there are enough 
+voltage-activated sodium channels in the closed (active) state to respond to 
+depolarization. However, voltage-gated potassium channels that opened in 
+response to repolarization do not close as quickly as voltage-gated sodium 
+channels; to return to the active closed state. During this time, the extra 
+potassium conductance means that the membrane is at a higher threshold and will 
+require a greater stimulus to cause action potentials to fire. This period is 
+the relative refractory period.&quot;<sup>7</sup></p>
+<p align="left">The salient part here being that there is an absolute refractory 
+period in which the neuron cannot fire again (usually about 1ms) and a relative 
+refractory period in which the action potential threshold is higher.&nbsp; The 
+latter is not modeled by Neuro-Sim.</p>
+<h3 align="left">Resting Potential</h3>
+<p align="left">&quot;The relatively static membrane potential of quiescent cells is 
+called the resting membrane potential (or resting voltage), as opposed to the 
+specific dynamic electrochemical phenomena called action potential and graded 
+membrane potential.&quot;<sup>8</sup></p>
+<p align="left">The resting potential is configurable for specific neuron 
+&quot;studies&quot; and is group assigned in &quot;network&quot; mode.</p>
+<h3 align="left">Threshold Potential</h3>
+<p align="left">&quot;The threshold potential is the critical level to which the 
+membrane potential must be depolarized in order to initiate an action 
+potential.&quot;<sup>9</sup></p>
+<p align="left">Under certain conditions, the depolarization of a neuron can 
+occur slowly enough that a higher than normal threshold is required to initiate 
+an action potential.&nbsp; In fact, if the depolarization occurs slowly enough, 
+no level of depolarization will achieve an action potential.&nbsp; This behavior 
+is not modeled in Neuro-Sim.&nbsp; However, the threshold potential is 
+configurable for specific neuron &quot;studies&quot; and is group assigned in &quot;network&quot; 
+mode.</p>
+<h3 align="left">Action Potential</h3>
+<p align="left">&quot;In physiology, an action potential is a short-lasting event in 
+which the electrical membrane potential of a cell rapidly rises and falls, 
+following a consistent trajectory. Action potentials occur in several types of 
+animal cells, called excitable cells, which include neurons, muscle cells, and 
+endocrine cells, as well as in some plant cells. In neurons, they play a central 
+role in cell-to-cell communication. In other types of cells, their main function 
+is to activate intracellular processes. In muscle cells, for example, an action 
+potential is the first step in the chain of events leading to contraction. In 
+beta cells of the pancreas, they provoke release of insulin.[a] Action 
+potentials in neurons are also known as &quot;nerve impulses&quot; or &quot;spikes&quot;, and the 
+temporal sequence of action potentials generated by a neuron is called its 
+&quot;spike train&quot;. A neuron that emits an action potential is often said to &quot;fire&quot;.<sup>10</sup></p>
+<p align="left">The action potential value is configurable for specific neuron 
+&quot;studies&quot; and is group assigned in &quot;network&quot; mode.</p>
+<h3 align="left">Pacemaker Neuron</h3>
+<p align="left">A pacemaker neuron is a neuron that spontaneously fires at 
+regular intervals.&nbsp; Neuro-Sim uses pacemaker neurons in the network 
+simulations to kick-start (and maintain) network activity.&nbsp; The number of 
+pacemaker neurons is configurable in &quot;network&quot; mode.</p>
+<p align="left"><img border="0" src="note.png" width="24" height="32">&nbsp; An 
+interesting simple &quot;study&quot; network consists of two pacemaker neurons, where one 
+neuron either inhibits or stimulates the other pacemaker neuron.&nbsp; Later on 
+we will see a couple examples of this, achieving simple frequency division and 
+frequency increases in the target pacemaker neuron.</p>
+<h3 align="left">Myelination</h3>
+<p align="left">&quot;Myelin is a fatty white substance that surrounds the axon 
+dielectric (electrically insulating) material that forms a layer, the myelin 
+sheath, usually around only the axon of a neuron. It is essential for the proper 
+functioning of the nervous system. It is an outgrowth of a type of glial cell.<br>
+<br>
+The production of the myelin sheath is called myelination. In humans, 
+myelination begins in the 14th week of fetal development, although little myelin 
+exists in the brain at the time of birth. During infancy, myelination occurs 
+quickly, leading to a child's fast development, including crawling and walking 
+in the first year. Myelination continues through the adolescent stage of life.&quot;<sup>11</sup></p>
+<p align="left">Besides not being able to ever spell this word correctly, 
+myelination is what allows an electrical signal to travel quickly and without 
+degradation down the axon to the pre-synaptic terminals.&nbsp; Without 
+myelination, our nervous system simply would not work. </p>
+<h3 align="left">Additional Terms used in Neuro-Sim</h3>
+<h4 align="left">Refractory Recovery Rate</h4>
+<p align="left">This is a configurable option for how quickly a neuron returns 
+to its resting potential from the hyperpolarization that occurs after an action 
+potential or an inhibitory input.</p>
+<h4 align="left">Hyperpolarization Overshoot</h4>
+<p align="left">This is the level that the membrane potential is set to after an 
+action potential.</p>
+<h4 align="left">Resting Potential Return Rate</h4>
+<p align="left">This is the rate at which a neuron returns from a depolarization 
+event that did not result in an action potential, back to its resting potential.</p>
+<h2 align="left">The UI</h2>
+<p align="left">
+<img border="0" src="screenshot-small.jpg" width="640" height="444"></p>
+<p align="center">Click 
+<a href="https://github.com/cliftonm/neurosim/blob/master/article/screenshot.png">
+here</a> for a full-size screenshot of Neuro-Sim on startup.</p>
+<p align="left">Let's first deal with the UI.&nbsp; There are two displays: on 
+the left we have either the neural network or the study network (shown below) 
+and on the right we have an oscilloscope (&quot;scope&quot;) display of neurons in the 
+study network.&nbsp; Below, there are three tabs:</p>
+<ol>
+	<li>
+	<p align="left">Neuron - the default neuron configuration</li>
+	<li>
+	<p align="left">Study - for studying small networks whose state is displayed 
+	on the scope</li>
+	<li>
+	<p align="left">Network - for configuring neuron connectivity and simulating 
+	large neural networks</li>
+</ol>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<h2 align="left">References</h2>
+<p align="left">1 - Neuron: <a href="https://en.wikipedia.org/wiki/Neuron">
+https://en.wikipedia.org/wiki/Neuron</a> <br>
+2 - Hebbian Theory: <a href="https://en.wikipedia.org/wiki/Hebbian_theory">
+https://en.wikipedia.org/wiki/Hebbian_theory</a> <br>
+3 - Dendrite: <a href="https://en.wikipedia.org/wiki/Dendrite">
+https://en.wikipedia.org/wiki/Dendrite</a> <br>
+4 - Axon: <a href="https://en.wikipedia.org/wiki/Axon">
+https://en.wikipedia.org/wiki/Axon</a> <br>
+5 - Axon Hillock: <a href="https://en.wikipedia.org/wiki/Axon_hillock">
+https://en.wikipedia.org/wiki/Axon_hillock</a> <br>
+6 - Synapse: <a href="https://en.wikipedia.org/wiki/Synapse">
+https://en.wikipedia.org/wiki/Synapse</a> <br>
+7 - Refractory Period: <a href="https://en.wikipedia.org/wiki/Refractory_period_(physiology)">https://en.wikipedia.org/wiki/Refractory_period_(physiology)</a>
+<br>
+8 - Resting Potential: <a href="https://en.wikipedia.org/wiki/Resting_potential">
+https://en.wikipedia.org/wiki/Resting_potential</a> <br>
+9 - Threshold Potential:
+<a href="https://en.wikipedia.org/wiki/Threshold_potential">
+https://en.wikipedia.org/wiki/Threshold_potential</a> <br>
+10 - Action Potential: <a href="https://en.wikipedia.org/wiki/Action_potential">
+https://en.wikipedia.org/wiki/Action_potential</a> <br>
+11 - Myelination: <a href="https://en.wikipedia.org/wiki/Myelin">
+https://en.wikipedia.org/wiki/Myelin</a> </p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">
+<br>
+<br>
+&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="left">&nbsp;</p>
+<p align="center">&nbsp;</p>
 
 </body>
 
