@@ -9,7 +9,7 @@ namespace neurosim
 {
 	public class Probe : ITimeComponent
 	{
-		protected Neuron neuron;
+		public Neuron Neuron { get; protected set; }
 		protected List<int> buffer;
 		protected int head;
 		protected int width;
@@ -20,14 +20,14 @@ namespace neurosim
 		{
 			buffer = new List<int>();
 			this.width = width;
-			this.neuron = neuron;
+			this.Neuron = neuron;
 			this.vOffset = vOffset;
 			dataPen = new Pen(color);
 		}
 
 		public void Tick()
 		{
-			NewValue(neuron.CurrentMembranePotential / 256);
+			NewValue(Neuron.CurrentMembranePotential / 256);
 		}
 
 		public void NewValue(int val)

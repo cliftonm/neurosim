@@ -39,6 +39,11 @@ namespace neurosim
 			probes.Add(new Probe(n, Width, color, vOffset));
 		}
 
+		public void RemoveProbe(Neuron n)
+		{
+			probes.Remove(probes.Single(p => p.Neuron == n));
+		}
+
 		public void Tick()
 		{
 			probes.ForEach(p => p.Tick());

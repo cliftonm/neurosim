@@ -490,8 +490,29 @@ namespace neurosim
 		{
 			// remove entry from rowNeuronMap.			
 			// remove entry from pnlScope probes
-			// remove entry from neuronPlots
 			// remove the row from the DataTable.
+			// remove entry from neuronPlots
+			// remove any connections!
+
+			if (dgvStudy.SelectedRows.Count == 1)
+			{
+				DataGridViewRow dgvr = dgvStudy.SelectedRows[0];
+				DataRowView drv = (DataRowView)dgvr.DataBoundItem;
+				DataRow row = drv.Row;
+				Neuron n = rowNeuronMap[row];
+				drv.Row.Delete();
+				rowNeuronMap.Remove(row);
+				pnlScope.RemoveProbe(n);
+				studyNeuronPlots.Remove(studyNeuronPlots.Single(snp => snp.Neuron == n));
+
+				foreach (Neuron nc in rowNeuronMap.Values)
+				{
+					if (nc.Connections.Exists(ncc => ncc.Neuron == n))
+					{
+						nc.Connections.Remove(nc.Connections.Single(ncc => ncc.Neuron == n));
+					}
+				}
+			}
 		}
 
 		private void btnCreate_Click(object sender, EventArgs e)

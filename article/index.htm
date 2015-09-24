@@ -10,10 +10,10 @@
 
 <p>Neuro-Sim</p>
 <p>A simulation of biological neurons</p>
-<p align="center">In theory there is no difference between theory and practice. 
-In practice there is.<br>
-&nbsp; -- Yogi Berra<br>
-&nbsp;</p>
+<p align="center"><u>Some teaser screenshots</u></p>
+<p align="center"><img border="0" src="intro1.png" width="463" height="297"> </p>
+<p align="center"><img border="0" src="intro2.png" width="213" height="202"></p>
+<p align="center"><img border="0" src="intro3.png" width="400" height="317"></p>
 <h2>Introduction</h2>
 <p>In this article I am presenting a neuron simulator and study tool.&nbsp; 
 Typically, neuron simulation is either highly idealized, consisting of an input 
@@ -70,7 +70,13 @@ chunked along.&nbsp; The simulator presented here easily handles over 8000
 neurons, and that's running on a single thread, including UI updates, on my 
 2.3Ghz i7 laptop.&nbsp; So, this has been one of those back-burner projects I've 
 been wanting to resurrect for years and I'm happy to have finally gotten around 
-to it.</p>
+to it.&nbsp; What surprised me the most in implementing this on today's computer 
+is that I had expected to have to implement the neuron &quot;sum and fire&quot; 
+computations in threads, batching them across available CPU's.&nbsp; This was 
+not the case!&nbsp; All the neuron calculations run in the application's main 
+thread.&nbsp; For larger networks I would expect that I would need to balance 
+the workload across multiple CPU's, but I haven't tested that implementation 
+yet.</p>
 <h3 align="left">What is not Simulated</h3>
 <p align="left">A variety of qualities of a neuron are not simulated.&nbsp; If 
 the terms used here are unfamiliar, read the next section &quot;Neurons: A Crash 
@@ -333,8 +339,65 @@ action potential.</p>
 <h4 align="left">Resting Potential Return Rate</h4>
 <p align="left">This is the rate at which a neuron returns from a depolarization 
 event that did not result in an action potential, back to its resting potential.</p>
+<h2 align="left">Simulation Modes</h2>
+<p align="left">There are two simulation modes implemented in Neuro-Sim: network 
+and study.</p>
+<h3 align="left">Network Mode</h3>
+<p align="center">
+<img border="0" src="networkmode.png" width="618" height="627"></p>
+<p align="center">Network Mode, showing an Action Potential Decay Plot</p>
+<p align="left">In network mode, all the neurons are configured the same, 
+however you can control:</p>
+<ol>
+	<li>
+	<p align="left">the number of connections</p></li>
+	<li>
+	<p align="left">the maximum distance (or length of axon) between connections</p>
+	</li>
+	<li>
+	<p align="left">the connection &quot;radius&quot; -- how dispersed the connections are 
+	from the axon endpoint</p></li>
+	<li>
+	<p align="left">the number of pacemaker neurons -- the neurons that fire at 
+	regular intervals to kickstart the simulation.</p></li>
+</ol>
+<p align="left">There are also to ways of viewing the plot:</p>
+<ol>
+	<li>
+	<p align="left">Action Potential Decay Plot -- this is illustrated above.&nbsp; 
+	When a neuron fires, the plotter will show the neuron as white and over 10 
+	steps decay the neuron's plot through yellow, red, and finally black.</p>
+	</li>
+	<li>
+	<p align="left">Membrane Potential Plot -- as illustrated below, this plot 
+	draws a neuron in:</p>
+	<ol>
+		<li>
+		<p align="left">white when it fires</p></li>
+		<li>
+		<p align="left">red during its refractory period</p></li>
+		<li>
+		<p align="left">and shades of green (fairly hard to see actually) 
+		representing the neuron's membrane potential</p></li>
+		<li>
+		<p align="left">black for neurons at their resting potential.</p></li>
+	</ol>
+	</li>
+</ol>
+<p align="center">
+<img border="0" src="networkmode2.png" width="462" height="295"></p>
+<p align="center">Network Mode, showing a Membrane Potential Plot</p>
+<h3 align="left">Study Mode</h3>
+<p align="center"><img border="0" src="studymode.png" width="640" height="444"></p>
+<p align="center">Study Mode: A Reflex Simulation</p>
+<p align="left">&nbsp;</p>
+<p align="left">In study mode, the user can create individual neurons with 
+specific characteristics and connections.&nbsp; Each neuron has a &quot;probe&quot; that 
+shows its activity on the scope.&nbsp; The above screenshot illustrates one of 
+the demos, a &quot;reflex&quot; simulation.&nbsp; The configuration values and usage is 
+described later.</p>
 <h2 align="left">The UI</h2>
-<p align="left">
+<p align="center">
 <img border="0" src="screenshot-small.jpg" width="640" height="444"></p>
 <p align="center">Click 
 <a href="https://github.com/cliftonm/neurosim/blob/master/article/screenshot.png">
@@ -353,9 +416,356 @@ study network.&nbsp; Below, there are three tabs:</p>
 	<p align="left">Network - for configuring neuron connectivity and simulating 
 	large neural networks</li>
 </ol>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
+<h3 align="left">Neuron Configuration Options</h3>
+<p align="center">
+<img border="0" src="neuronconfig.png" width="446" height="262"></p>
+<p align="center">Configuring the Default Neuron</p>
+<p align="left">The six values that can be configured for a neuron are:</p>
+<ol>
+	<li>
+	<p align="left">Resting Potential -- by default, the resting potential is 
+	-65mv (millivolts).&nbsp; This represents the acquiescent state of the 
+	neuron.</p></li>
+	<li>
+	<p align="left">AP Threshold -- this is the action potential threshold -- if 
+	the membrane potential at the summation site, the axon hillock, meets or 
+	exceeds this value, an action potential occurs (the neuron &quot;fires&quot;)</p></li>
+	<li>
+	<p align="left">AP Value -- this is the action potential value, by default 
+	40mv.</p></li>
+	<li>
+	<p align="left">Ref. Rec. Rate -- this value represents the return to the 
+	resting potential as a rate -- the change in membrane potential per &quot;tick.&quot;</p>
+	</li>
+	<li>
+	<p align="left">HP Overshoot -- this is the value subtracted from the 
+	resting potential to represent the hyperpolarization after an action 
+	potential.&nbsp; The default, 20mv, represents that the hyperpolarization 
+	value after an action potential will be -65 - 20, or -85mv.</p></li>
+	<li>
+	<p align="left">RP Return Rate -- this value represents the return to the 
+	resting potential after depolarization -- the change in membrane potential 
+	per &quot;tick.&quot;&nbsp; When the neuron is depolarized without achieving the 
+	action potential threshold, this value is subtracted from the depolarized 
+	membrane potential per &quot;tick&quot;, eventually returning the neuron to its 
+	resting potential.</p></li>
+</ol>
+<p align="left">These values can be changed in realtime for the &quot;network mode&quot; 
+of the simulation.</p>
+<h3 align="left">Network Mode Configuration Options</h3>
+<p align="center">
+<img border="0" src="networkmodeconfig.png" width="613" height="300"></p>
+<p align="center">Network Mode Configuration Options</p>
+<p align="left">In network mode, the following can be configured:</p>
+<ol>
+	<li>
+	<p align="left">the number of connections</p></li>
+	<li>
+	<p align="left">the maximum distance (or length of axon) between connections</p>
+	</li>
+	<li>
+	<p align="left">the connection &quot;radius&quot; -- how dispersed the connections are 
+	from the axon endpoint</p></li>
+	<li>
+	<p align="left">the number of pacemaker neurons -- the neurons that fire at 
+	regular intervals to kickstart the simulation.</p></li>
+	<li>
+	<p align="left">the plot type -- action potential decay plot or membrane 
+	potential plot (as described earlier.)</p></li>
+</ol>
+<h3 align="left">Study Mode</h3>
+<p align="center">
+<img border="0" src="studymode2.png" width="1002" height="231"></p>
+<p align="center">Study Mode Neuron Configuration</p>
+<p align="left">In study mode, individual neurons can be added and removed from 
+the network.&nbsp; Each neuron's options can also have a specific configuration:</p>
+<p align="left">The six values that can be configured for a neuron are:</p>
+<ol>
+	<li>
+	<p align="left">RP: Resting Potential -- by default, the resting potential 
+	is -65mv (millivolts).&nbsp; This represents the acquiescent state of the 
+	neuron.</p></li>
+	<li>
+	<p align="left">APT: AP Threshold -- this is the action potential threshold 
+	-- if the membrane potential at the summation site, the axon hillock, meets 
+	or exceeds this value, an action potential occurs (the neuron &quot;fires&quot;)</p>
+	</li>
+	<li>
+	<p align="left">APV: AP Value -- this is the action potential value, by 
+	default 40mv.</p></li>
+	<li>
+	<p align="left">RRR: Ref. Rec. Rate -- this value represents the return to 
+	the resting potential as a rate -- the change in membrane potential per 
+	&quot;tick.&quot;</p></li>
+	<li>
+	<p align="left">HPO: HP Overshoot -- this is the value subtracted from the 
+	resting potential to represent the hyperpolarization after an action 
+	potential.&nbsp; The default, 20mv, represents that the hyperpolarization 
+	value after an action potential will be -65 - 20, or -85mv.</p></li>
+	<li>
+	<p align="left">RPRR: RP Return Rate -- this value represents the return to 
+	the resting potential after depolarization -- the change in membrane 
+	potential per &quot;tick.&quot;&nbsp; When the neuron is depolarized without achieving 
+	the action potential threshold, this value is subtracted from the 
+	depolarized membrane potential per &quot;tick&quot;, eventually returning the neuron 
+	to its resting potential.</p></li>
+	<li>
+	<p align="left">LKG: Leakage -- this represents a depolarization rate (per 
+	&quot;tick&quot;) and is used to create a pacemaker neuron</p></li>
+	<li>
+	<p align="left">PCOLOR: the scope plot color -- this value is auto-assigned</p>
+	</li>
+	<li>
+	<p align="left">Conn: the neuron's connections</p></li>
+</ol>
+<h4 align="left">Connections</h4>
+<p align="left">The connections is a comma delimited list of &quot;connect to&quot; neuron 
+and the post-synaptic membrane potential change in parenthesis.&nbsp; For 
+example:</p>
+<p align="left">3(40),4(40),6(40)</p>
+<p align="left">indicates that the pre-synaptic neuron connects to neurons 3, 4, 
+and 6 (the neuron number &quot;n&quot; in the screenshot above) and results in a 
+post-synaptic depolarization of 40mv in each case.&nbsp; Excitatory synapses are 
+represented by positive values and inhibitory synapses are represented by 
+negative values.&nbsp; Here, for example, is an inhibitory synapse:</p>
+<p align="left">5(-40)</p>
+<h4 align="left">The Network</h4>
+<p align="center"><img border="0" src="reflex1.png" width="208" height="196"></p>
+<p align="center">Study Mode Network Plot</p>
+<p align="left">In study mode, the network is plotted using an idealized 
+representation of a neuron:</p>
+<ul>
+	<li>
+	<p align="left">The cell body is represented by a circle.</p></li>
+	<li>
+	<p align="left">Excitatory synapses are represented as white triangles.</p>
+	</li>
+	<li>
+	<p align="left">Inhibitory synapses are represented as black triangles.</p>
+	</li>
+</ul>
+<p align="left">Also, when running the simulation, when a neuron fires, the 
+&quot;cell body&quot; (the circle) turns red and goes through the decay as in an action 
+potential decay plot.</p>
+<h4 align="left">Adjusting the Study Mode Plot</h4>
+<p align="center"><img border="0" src="studymode3.png" width="220" height="174"></p>
+<p align="center">After Moving Neurons in the Study Plot</p>
+<p align="left">The user can click and drag a neuron &quot;body&quot; (the circle) to 
+create the desired visual plot.&nbsp; The above screenshot shows the same 
+network but with the neurons in different positions.&nbsp; Also, when clicking 
+on a neuron's &quot;body&quot;, the corresponding entry in the neuron configuration grid 
+will be selected, which makes it easier to figure out which neuron is what.&nbsp; 
+(Granted, this UI could be improved a lot!)</p>
+<h3 align="left">Pause / Resume / Step</h3>
+<p align="left"><img border="0" src="pause-step.png" width="90" height="62">
+<img border="0" src="resume-step.png" width="91" height="65"></p>
+<p align="left">You start a simulation by clicking on &quot;Resume&quot;.&nbsp; You can 
+also pause the simulation by clicking on Pause.&nbsp; When paused, the Step 
+button is enabled.&nbsp; Step will run the simulator until a neuron fires.</p>
+<h2 align="left">Study Mode Examples</h2>
+<p align="left">I've put together several examples to play with.</p>
+<h3 align="left">Pacemaker Neuron</h3>
+<p align="center"><img border="0" src="example1.png" width="477" height="320"></p>
+<p align="center">A Pacemaker Neuron Example</p>
+<p align="left">This is very simple example illustrating the activity of a 
+pacemaker neuron.&nbsp; A pacemaker neuron is useful for seeding a network or 
+simulating external stimulus (as is used in the reflex example).</p>
+<h3 align="left">Frequency Divider Example</h3>
+<p align="center"><img border="0" src="example2.png" width="534" height="323"></p>
+<p align="center">A Divider Neuron Example</p>
+<p align="left">In this example, a simple frequency divider neural &quot;circuit&quot; 
+illustrates how a recurring action potential will result in the post-synaptic 
+neuron summing the action potentials in a graded manner and eventually firing 
+when the post-synaptic neuron's action potential threshold is met.</p>
+<h3 align="left">Frequency Decreaser Example</h3>
+<p align="center"><img border="0" src="example3.png" width="578" height="325"></p>
+<p align="center">Decreasing Frequency Example</p>
+<p align="left">In this example, a baseline pacemaker neuron (the red trace) is 
+used to illustrate how one pacemaker neuron (the cyan trace) can be used to 
+decrease the firing rate of a second pacemaker neuron (the white trace).&nbsp; 
+This is a nice example of the action of an inhibitory signal, as one can see the 
+inhibitory action (polarization) on the target neuron whenever the pre-synaptic 
+neuron (the cyan trace) fires.</p>
+<h3 align="left">Frequency Increaser Example</h3>
+<p align="center"><img border="0" src="example4.png" width="553" height="322"></p>
+<p align="center">Increasing Frequency Example</p>
+<p align="left">Similar to the previous example, a baseline neuron (the red 
+trace) is used to show how a pre-synaptic pacemaker neuron (the cyan trace) 
+increases the frequency of firing of the post-synaptic pacemaker neuron (the 
+white trace.)&nbsp; Here, the pre-synaptic pacemaker neuron acts in an 
+excitatory manner upon the post-synaptic neuron, increasing its firing rate by 
+further depolarizing the neuron.</p>
+<h3 align="left">Reflex Action Example</h3>
+<p align="left">This is the most interesting example, as it models the knee jerk 
+reflex:</p>
+<p align="center"><img border="0" src="reflex2.png" width="507" height="239"></p>
+<p align="center">Knee Jerk Reflex (courtesy of
+<a href="http://cbsetextbooks.weebly.com/21-neural-control-and-coordination.html">
+http://cbsetextbooks.weebly.com/21-neural-control-and-coordination.html</a>)</p>
+<p align="left">In Neuro-Sim, this is modeled as:</p>
+<p align="center"><img border="0" src="reflex3.png" width="384" height="253"></p>
+<p align="center">Model of Reflex Action</p>
+<p align="left">In this example, the neuron attached to the &quot;muscle spindle&quot; 
+(circled in red) has an afferent pathway, connecting to the neuron in the 
+&quot;muscle&quot; that jerks in response to stimulus (green).&nbsp; A signal is also sent 
+to the &quot;brain&quot; which tries to prevent the contraction by exciting a neuron that 
+attempts to activate the muscles at the motor endplate.&nbsp; However, this is 
+not possible because the afferent neuron, via an interneuron, creates an 
+inhibitory reaction, prevent the &quot;brain&quot; from creating a muscle contraction on 
+the nerve attached to the motor endplate.</p>
+<p align="center"><img border="0" src="reflex4.png" width="879" height="329"></p>
+<p align="center">Scope and Network Trace of the Reflex Action</p>
+<p align="left">The above diagram illustrates the scope trace and the neurons 
+that fire.&nbsp; Note the bottom right neuron does not fire because the 
+interneuron is inhibiting it, thus you, as a person, cannot prevent your leg 
+from jerking up!</p>
+<h2 align="left">Behind the Scenes</h2>
+<p align="left">There really isn't that much to the simulator!</p>
+<h3 align="left">Neuron State</h3>
+<p align="left">Neurons 
+implement a state machine that determines whether the neuron is integrating 
+(summing excitatory and inhibitory inputs), performing an action potential, or 
+is in the refractory period:</p>
+<pre>public void Tick()
+{
+  switch (actionState)
+  {
+    case State.Integrating:
+      Integrate();
+      Fired = FireOnActionPotential();
+
+      if (!Fired)
+      {
+        // Incrementally return to resting potential.
+        int dir = Math.Sign(config.RestingPotential - CurrentMembranePotential);
+        // Get the min delta so that we return exactly to the resting potential on the last step.
+
+        if (dir == -1) // current membrane potential &gt; resting potential, so return at some rate to the resting potential.
+        {
+          CurrentMembranePotential += config.RestingPotentialReturnRate;
+        }
+
+      break;
+
+    case State.Firing:
+      Fired = false;
+      ++actionState; // hold for one 1 tick
+      break;
+
+    case State.RefractoryStart:
+      // refactory period start
+      CurrentMembranePotential = config.RestingPotential - config.HyperPolarizationOvershoot;
+      ++actionState;
+      break;
+
+    case State.AbsoluteRefractory:
+      // refactory period, linear ramp back to the resting potential.
+      CurrentMembranePotential += config.RefractoryRecoveryRate;
+
+      if (CurrentMembranePotential &gt;= config.RestingPotential)
+      {
+        // Done with absolute refractory period.
+        inputs.Clear(); // The neuron doesn't integrate any inputs during the absolute refractory period.
+        actionState = State.Integrating;
+      }
+
+      break;
+
+    case State.RelativeRefractory:
+      // Not implemented.
+      break;
+  }
+}</pre>
+<h3 align="left">Neuron Math</h3>
+<p align="left">The math is all integer based.&nbsp; Whole number &quot;potentials&quot; 
+are represented in the upper 24 bits of the integer, while the fractional 
+component is represented in the lower 8 bits.&nbsp; This (theoretically) speeds 
+up the processing of the integration, as we can stay completely within integer 
+math.&nbsp; The concept is illustrated by seeing how the default neuron is 
+configured:</p>
+<pre>public NeuronConfig()
+{
+  RestingPotential = -65 &lt;&lt; 8;
+  ActionPotentialThreshold = -35 &lt;&lt; 8;
+  ActionPotentialValue = 40 &lt;&lt; 8;
+  RefractoryRecoveryRate = 1 &lt;&lt; 8;
+  HyperPolarizationOvershoot = 20 &lt;&lt; 8;
+  RestingPotentialReturnRate = -8;
+}</pre>
+</p>
+<h3 align="left">Network Plots</h3>
+<p align="left">The performance of network plots is improved by using the 
+FastPixel implementation that CPian &quot;ratamoa&quot; proved in, yes, 2006, in
+<a href="http://www.codeproject.com/Articles/15192/FastPixel-A-much-faster-alternative-to-Bitmap-SetP?msg=1719833#xx1719833xx">
+this article</a>.&nbsp; This allows for fast pixel writes:</p>
+<pre>public void Plot(FastPixel fp, Point location, Color color)
+{
+  fp.SetPixel(location, color);
+  fp.SetPixel(location + new Size(1, 0), color);
+  fp.SetPixel(location + new Size(0, 1), color);
+  fp.SetPixel(location + new Size(1, 1), color);
+}</pre>
+<p align="left">where each neuron is plotted as a 2x2 box.</p>
+<h3 align="left">Study Plots</h3>
+<p align="left">The neurons in the study network are rendered using the standard 
+<code>Graphics</code> functions.&nbsp; The most complicated code is here, in calculating how 
+to draw the connecting &quot;axon&quot; and &quot;synapse&quot;:</p>
+<pre>protected void DrawSynapse(Pen pen, Graphics gr, Point start, Point end, Connection.CMode mode)
+{
+  double t = Math.Atan2(end.Y - start.Y, end.X - start.X);
+  double endt = Math.Atan2(start.Y - end.Y, start.X - end.X);
+
+  // start at the circumference of the circle.
+  Size offset = new Size((int)(5 * Math.Cos(t)), (int)(5 * Math.Sin(t)));
+
+  // end at the circumference of the target neuron circle.
+  Point endOffset = new Point((int)(15 * Math.Cos(endt)), (int)(15 * Math.Sin(endt)));
+  end.Offset(endOffset);
+  gr.DrawLine(pen, start + offset, end);
+
+  // the synapse is a triangle whose base is opposite and perpendicular to the endpoint.
+  double v1angle = t - 0.785398163;
+  double v2angle = t + 0.785398163;
+
+  Point v1 = new Point((int)(10 * Math.Cos(v1angle)), (int)((10 * Math.Sin(v1angle))));
+  v1.Offset(end);
+
+  Point v2 = new Point((int)(10 * Math.Cos(v2angle)), (int)((10 * Math.Sin(v2angle))));
+  v2.Offset(end);
+
+  switch (mode)
+  {
+    case Connection.CMode.Excitatory:
+      // A white triangle.
+      gr.DrawLine(pen, end, v1);
+      gr.DrawLine(pen, end, v2);
+      gr.DrawLine(pen, v1, v2);
+      break;
+
+    case Connection.CMode.Inhibitory:
+      // A black triangle.
+      gr.FillPolygon(brushBlack, new Point[] { end, v1, v2 }, System.Drawing.Drawing2D.FillMode.Winding);
+      break;
+  }
+}</pre>
+<p align="left">This involves calculating the angle between the pre-synaptic 
+body and the post-synaptic body, as well as keeping the connection offset by the 
+width the of circle representing the neuron body.</p>
+<p align="left">Axons are &quot;virtualized&quot;, in that multiple connections all extend 
+in different directions from the pre-synaptic body source, so it appears as if 
+the neuron has multiple axons:</p>
+<p align="center"><img border="0" src="example5.png" width="199" height="197"></p>
+<p align="center">Neuron has One Axon But Looks Like Three</p>
+<p align="left">As the above illustrates, it looks like the neuron on the left 
+has three axons connecting to three other neurons -- this is a convenience for 
+drawing the network.</p>
+<h2 align="left">Conclusion</h2>
+<p align="left">As a preliminary simulation of a neuron's membrane potential 
+through integration, action, and refractory periods, Neuro-Sim is a fun and 
+interesting tool to use to play with simple neuron networks.&nbsp; In find the 
+&quot;network mode&quot; is quite mesmerizing to watch but for the moment it doesn't 
+represent anything concrete.&nbsp; Adding external stimuli (sound, images, etc) 
+is perhaps a next logical step, as well as exploring learning and memory.</p>
 <h2 align="left">References</h2>
 <p align="left">1 - Neuron: <a href="https://en.wikipedia.org/wiki/Neuron">
 https://en.wikipedia.org/wiki/Neuron</a> <br>
@@ -380,23 +790,6 @@ https://en.wikipedia.org/wiki/Threshold_potential</a> <br>
 https://en.wikipedia.org/wiki/Action_potential</a> <br>
 11 - Myelination: <a href="https://en.wikipedia.org/wiki/Myelin">
 https://en.wikipedia.org/wiki/Myelin</a> </p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">
-<br>
-<br>
-&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
-<p align="center">&nbsp;</p>
 
 </body>
 
